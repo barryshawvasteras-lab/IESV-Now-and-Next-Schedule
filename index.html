@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Now & Next Display</title>
     <style>
+        /* All your styles from before go here... */
         :root {
             --color-bg: #f4f7f6;
             --color-header-bg: #ffffff;
@@ -17,152 +18,23 @@
             --color-break: #7f8c8d;
             --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
-        
-        body {
-            font-family: var(--font-main);
-            background-color: var(--color-bg);
-            color: var(--color-text-primary);
-            margin: 0;
-            padding: 16px;
-        }
-        
-        h1 {
-            color: var(--color-text-header);
-            text-align: center;
-            font-size: 2.0em;
-            margin-bottom: 0;
-        }
-
-        #clock {
-            text-align: center;
-            font-size: 1.2em;
-            color: var(--color-text-secondary);
-            margin-bottom: 20px;
-        }
-
-        #week-display {
-            text-align: center;
-            font-size: 1.0em;
-            font-weight: bold;
-            color: var(--color-text-header);
-            margin-bottom: 20px;
-            margin-top: -16px;
-        }
-        
-        /* This container holds our "pages" */
-        .view-container {
-            display: none; /* Hidden by default */
-        }
-        .view-container.active {
-            display: block; /* The active page is shown */
-        }
-
-        #now-next-container, #full-day-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 16px;
-        }
-        
-        .class-card {
-            background-color: var(--color-header-bg);
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            border: 1px solid var(--color-border);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .class-header {
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--color-border);
-        }
-        
-        .class-header h2 {
-            margin: 0;
-            font-size: 1.5em;
-            color: var(--color-text-primary);
-        }
-        
-        .class-body {
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            flex-grow: 1;
-        }
-        
-        .event {
-            line-height: 1.4;
-        }
-
-        .event-type {
-            font-weight: bold;
-            font-size: 0.9em;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
+        body { font-family: var(--font-main); background-color: var(--color-bg); color: var(--color-text-primary); margin: 0; padding: 16px; }
+        h1 { color: var(--color-text-header); text-align: center; font-size: 2.0em; margin-bottom: 0; }
+        #clock { text-align: center; font-size: 1.2em; color: var(--color-text-secondary); margin-bottom: 20px; }
+        #week-display { text-align: center; font-size: 1.0em; font-weight: bold; color: var(--color-text-header); margin-bottom: 20px; margin-top: -16px; }
+        #dashboard-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+        .class-card { background-color: var(--color-header-bg); border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); border: 1px solid var(--color-border); overflow: hidden; display: flex; flex-direction: column; }
+        .class-header { padding: 12px 16px; border-bottom: 1px solid var(--color-border); }
+        .class-header h2 { margin: 0; font-size: 1.5em; color: var(--color-text-primary); }
+        .class-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; flex-grow: 1; }
+        .event { line-height: 1.4; }
+        .event-type { font-weight: bold; font-size: 0.9em; text-transform: uppercase; letter-spacing: 0.5px; }
         .event-type.now { color: var(--color-now); }
         .event-type.next { color: var(--color-next); }
         .event-type.break { color: var(--color-break); }
-        
-        .event-subject {
-            font-size: 1.2em;
-            font-weight: 600;
-            margin: 2px 0;
-        }
-        
-        .event-details, .event-teacher {
-            font-size: 0.9em;
-            color: var(--color-text-secondary);
-        }
-
-        .event-teacher {
-            font-weight: 600; /* Make teacher name stand out a bit */
-        }
-
-        .event-none {
-            font-size: 1.0em;
-            color: var(--color-text-secondary);
-            flex-grow: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 40px;
-        }
-
-        /* NEW STYLES FOR FULL DAY VIEW */
-        #full-day-container .class-body {
-            gap: 8px; /* Tighter spacing for the list */
-            padding: 12px 16px;
-        }
-
-        .full-day-lesson {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.9em;
-            border-bottom: 1px solid #f0f0f0;
-            padding-bottom: 4px;
-        }
-        .full-day-lesson:last-child {
-            border-bottom: none;
-        }
-        .full-day-time {
-            font-weight: 600;
-            color: var(--color-text-primary);
-            flex-shrink: 0; /* Prevents time from wrapping */
-            margin-right: 8px;
-        }
-        .full-day-subject {
-            text-align: right;
-            color: var(--color-text-secondary);
-        }
-        .full-day-subject strong {
-            color: var(--color-text-primary);
-        }
-
-
+        .event-subject { font-size: 1.2em; font-weight: 600; margin: 2px 0; }
+        .event-details { font-size: 0.9em; color: var(--color-text-secondary); }
+        .event-none { font-size: 1.0em; color: var(--color-text-secondary); flex-grow: 1; display: flex; align-items: center; justify-content: center; min-height: 40px; }
     </style>
 </head>
 <body>
@@ -170,24 +42,15 @@
     <h1>School Schedule</h1>
     <div id="clock">Loading...</div>
     <div id="week-display"></div>
-
-    <div id="nowNextView" class="view-container active">
-        <div id="now-next-container">
-            </div>
+    <div id="dashboard-container">
+        <h2>Loading Schedule Data...</h2>
     </div>
-
-    <div id="fullDayView" class="view-container">
-        <div id="full-day-container">
-            </div>
-    </div>
-
 
     <script>
         // --- NO DATA HERE ---
-        // This script fetches 'Lessons.txt' automatically.
+        // This script now fetches 'Lessons.txt' automatically.
 
         let allLessons = []; // Global variable to hold the parsed lessons
-        let currentView = 0; // 0 = Now/Next, 1 = Full Day
 
         /**
          * Converts a time string (HHMM) to total minutes from midnight.
@@ -261,8 +124,7 @@
                 starttime: headers.indexOf('starttime'),
                 length: headers.indexOf('length'),
                 room: headers.indexOf('room'),
-                realweeks: headers.indexOf('realweeks'),
-                teacher: headers.indexOf('teacher') // <-- NEW
+                realweeks: headers.indexOf('realweeks')
             };
 
             for (const key in colIdx) {
@@ -291,7 +153,6 @@
                     subject: values[colIdx.subject].trim(),
                     day: day,
                     room: values[colIdx.room].trim(),
-                    teacher: values[colIdx.teacher].trim(), // <-- NEW
                     startTime: startTime,
                     endTime: startTime + length,
                     startTimeStr: minutesToTime(startTime),
@@ -313,29 +174,24 @@
         }
 
         /**
-         * Gets all lessons for a class for a specific day and week.
+         * Gets the current "Now" and "Next" lessons for a specific class.
          */
-        function getLessonsForDay(className, nowDay, currentWeek) {
+        function getNowAndNext(className, nowDay, nowMinutes, currentWeek) {
             const dayMap = ["", "Mon", "Tue", "Wed", "Thu", "Fri"];
             const currentDayStr = dayMap[nowDay];
 
             if (!currentDayStr) {
-                return []; // Weekend
+                return { now: null, next: null }; // Weekend
             }
 
-            return allLessons
+            const todayLessons = allLessons
                 .filter(l => 
                     l.group === className && 
                     l.day === currentDayStr &&
                     l.validWeeks.includes(currentWeek)
                 )
                 .sort((a, b) => a.startTime - b.startTime);
-        }
 
-        /**
-         * Gets the current "Now" and "Next" lessons.
-         */
-        function getNowAndNext(todayLessons, nowMinutes) {
             let now = null;
             let next = null;
 
@@ -364,9 +220,9 @@
         }
 
         /**
-         * Creates the HTML for the "Now & Next" card.
+         * Creates the HTML for a single lesson event.
          */
-        function createNowNextEventHTML(lesson, type) {
+        function createEventHTML(lesson, type) {
             if (!lesson) {
                 if (type === 'now') {
                     return `<div class="event"><div class="event-type break">Now</div><div class="event-subject">Break / Lunch</div><div class="event-details">No class scheduled</div></div>`;
@@ -376,114 +232,60 @@
             }
             
             const location = lesson.room ? `(${lesson.room})` : '';
-            const teacher = lesson.teacher ? `${lesson.teacher}` : ''; // <-- NEW
             const timeDetails = type === 'now' 
                 ? `Ends at ${lesson.endTimeStr}` 
                 : `Starts at ${lesson.startTimeStr}`;
 
-            return `
-                <div class="event">
-                    <div class="event-type ${type}">${type}</div>
-                    <div class="event-subject">${lesson.subject} ${location}</div>
-                    <div class="event-teacher">${teacher}</div>
-                    <div class="event-details">${timeDetails}</div>
-                </div>`;
+            return `<div class="event"><div class="event-type ${type}">${type}</div><div class="event-subject">${lesson.subject} ${location}</div><div class="event-details">${timeDetails}</div></div>`;
         }
 
-
         /**
-         * Main function to UPDATE THE CONTENT of the dashboard.
-         * This runs every 30 seconds.
+         * Main function to update the dashboard. This re-runs every 30 seconds.
          */
-        function updateAllDashboards() {
-            if (allLessons.length === 0) return; // Data not loaded
+        function updateDashboard() {
+            if (allLessons.length === 0) {
+                return; // Don't run if data isn't loaded
+            }
 
             const classNames = [...new Set(allLessons.map(l => l.group))]
                 .filter(name => /^[4-9][A-Z]$/.test(name)) 
                 .sort();
             
-            const nowNextContainer = document.getElementById('now-next-container');
-            const fullDayContainer = document.getElementById('full-day-container');
-            nowNextContainer.innerHTML = ''; 
-            fullDayContainer.innerHTML = '';
+            const container = document.getElementById('dashboard-container');
+            container.innerHTML = ''; 
             
             const now = new Date(new Date().toLocaleString("en-US", {timeZone: "Europe/Stockholm"}));
             const nowDay = now.getDay(); 
             const nowMinutes = (now.getHours() * 60) + now.getMinutes();
             const currentWeek = getWeekNumber(now); 
 
-            // Update clock and week display
             const clockEl = document.getElementById('clock');
             const weekEl = document.getElementById('week-display');
             const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+            
             clockEl.innerHTML = `${dayNames[nowDay]}, ${minutesToTime(nowMinutes)}`;
             weekEl.innerHTML = `Displaying Schedule for: Week ${currentWeek}`;
 
             if (nowDay === 0 || nowDay === 6) {
-                nowNextContainer.innerHTML = "<h2>It's the weekend.</h2>";
-                fullDayContainer.innerHTML = "<h2>It's the weekend.</h2>";
+                container.innerHTML = "<h2>It's the weekend.</h2>";
                 return;
             }
 
-            // Generate a card for each class
             for (const className of classNames) {
-                // Get all lessons for the day
-                const todayLessons = getLessonsForDay(className, nowDay, currentWeek);
+                const { now: nowLesson, next: nextLesson } = getNowAndNext(className, nowDay, nowMinutes, currentWeek);
                 
-                // --- 1. Build "Now & Next" Card ---
-                const { now: nowLesson, next: nextLesson } = getNowAndNext(todayLessons, nowMinutes);
-                const nowNextCard = document.createElement('div');
-                nowNextCard.className = 'class-card';
-                nowNextCard.innerHTML = `
+                const card = document.createElement('div');
+                card.className = 'class-card';
+                
+                card.innerHTML = `
                     <div class="class-header"><h2>${className}</h2></div>
                     <div class="class-body">
-                        ${createNowNextEventHTML(nowLesson, 'now')}
-                        ${createNowNextEventHTML(nextLesson, 'next')}
+                        ${createEventHTML(nowLesson, 'now')}
+                        ${createEventHTML(nextLesson, 'next')}
                     </div>
                 `;
-                nowNextContainer.appendChild(nowNextCard);
-
-                // --- 2. Build "Full Day Schedule" Card ---
-                const fullDayCard = document.createElement('div');
-                fullDayCard.className = 'class-card';
-                let fullDayBody = '<div class="event-none">No classes scheduled</div>';
-                
-                if (todayLessons.length > 0) {
-                    fullDayBody = todayLessons.map(lesson => `
-                        <div class="full-day-lesson">
-                            <span class="full-day-time">${lesson.startTimeStr}</span>
-                            <span class="full-day-subject">
-                                <strong>${lesson.subject}</strong> ${lesson.room ? `(${lesson.room})` : ''}
-                            </span>
-                        </div>
-                    `).join('');
-                }
-                
-                fullDayCard.innerHTML = `
-                    <div class="class-header"><h2>${className} - Today</h2></div>
-                    <div class="class-body">
-                        ${fullDayBody}
-                    </div>
-                `;
-                fullDayContainer.appendChild(fullDayCard);
+                container.appendChild(card);
             }
-        }
-
-        /**
-         * NEW: This function "rolls" the page.
-         * It runs every 15 seconds.
-         */
-        function switchView() {
-            const views = document.querySelectorAll('.view-container');
-            currentView = (currentView + 1) % views.length; // Cycle 0, 1, 0, 1...
-            
-            views.forEach((view, index) => {
-                if (index === currentView) {
-                    view.classList.add('active');
-                } else {
-                    view.classList.remove('active');
-                }
-            });
         }
 
         /**
@@ -491,31 +293,26 @@
          */
         async function loadDataAndRun() {
             try {
-                const response = await fetch('Lessons.txt?cachebust=' + new Date().getTime()); // Added cache buster
+                // This tries to fetch the 'Lessons.txt' file
+                const response = await fetch('Lessons.txt'); 
                 if (!response.ok) {
                     throw new Error(`Failed to load Lessons.txt (Status: ${response.status})`);
                 }
                 const tsvData = await response.text();
                 
+                // Parse the data and store it in the global variable
                 allLessons = parseLessons(tsvData); 
                 
                 if (allLessons.length === 0) {
                     throw new Error("Could not parse any lessons from the data file.");
                 }
                 
-                // Run the update first to populate content
-                updateAllDashboards(); 
+                updateDashboard(); // Run the display for the first time
+                setInterval(updateDashboard, 30000); // Set it to refresh every 30 seconds
                 
-                // Then set it to refresh content every 30 seconds
-                setInterval(updateAllDashboards, 30000); 
-                
-                // And set it to "roll" the page every 15 seconds
-                setInterval(switchView, 15000); // <-- NEW: Change 15000 (ms) to adjust roll speed
-
             } catch (error) {
                 console.error(error);
-                const container = document.getElementById('now-next-container');
-                container.innerHTML = `
+                document.getElementById('dashboard-container').innerHTML = `
                     <h2 style="color: red;">Error: Could not load schedule.</h2>
                     <p>${error.message}</p>
                     <p>Please make sure the <b>Lessons.txt</b> file is uploaded to the same project and is public.</p>`;
