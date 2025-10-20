@@ -23,26 +23,34 @@
             background-color: var(--color-bg);
             color: var(--color-text-primary);
             margin: 0;
-            padding: 16px; /* CHANGED: Was 24px */
+            padding: 16px;
         }
         
         h1 {
             color: var(--color-text-header);
             text-align: center;
-            font-size: 2.0em; /* CHANGED: Was 2.5em */
+            font-size: 2.0em;
             margin-bottom: 0;
         }
 
         #clock {
             text-align: center;
-            font-size: 1.2em; /* CHANGED: Was 1.5em */
+            font-size: 1.2em;
             color: var(--color-text-secondary);
-            margin-bottom: 20px; /* CHANGED: Was 24px */
+            margin-bottom: 20px;
+        }
+
+        #week-display {
+            text-align: center;
+            font-size: 1.0em;
+            font-weight: bold;
+            color: var(--color-text-header);
+            margin-bottom: 20px;
+            margin-top: -16px;
         }
         
         #dashboard-container {
             display: grid;
-            /* CHANGED: minmax was 320px, gap was 20px */
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 16px;
         }
@@ -58,20 +66,17 @@
         }
         
         .class-header {
-            /* CHANGED: Was 16px 20px */
             padding: 12px 16px;
             border-bottom: 1px solid var(--color-border);
         }
         
         .class-header h2 {
             margin: 0;
-            /* CHANGED: Was 1.8em */
             font-size: 1.5em;
             color: var(--color-text-primary);
         }
         
         .class-body {
-            /* CHANGED: Was 20px padding, 16px gap */
             padding: 16px;
             display: flex;
             flex-direction: column;
@@ -95,27 +100,24 @@
         .event-type.break { color: var(--color-break); }
         
         .event-subject {
-            /* CHANGED: Was 1.4em */
             font-size: 1.2em;
             font-weight: 600;
             margin: 2px 0;
         }
         
         .event-details {
-            /* CHANGED: Was 1em */
             font-size: 0.9em;
             color: var(--color-text-secondary);
         }
 
         .event-none {
-            /* CHANGED: Was 1.2em */
             font-size: 1.0em;
             color: var(--color-text-secondary);
             flex-grow: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 40px; /* CHANGED: Was 50px */
+            min-height: 40px;
         }
 
     </style>
@@ -124,6 +126,7 @@
 
     <h1>School Schedule</h1>
     <div id="clock">Loading...</div>
+    <div id="week-display"></div>
     <div id="dashboard-container">
         </div>
 
@@ -139,8 +142,6 @@
 
         /**
          * Converts a time string (HHMM) to total minutes from midnight.
-         * @param {string} timeStr - e.g., "0900" or "1425"
-         * @returns {number} - e.g., 540 or 865
          */
         function timeToMinutes(timeStr) {
             const hours = parseInt(timeStr.substring(0, 2), 10);
@@ -150,8 +151,6 @@
 
         /**
          * Formats total minutes from midnight to a HH:MM string.
-         * @param {number} totalMinutes
-         * @returns {string} - e.g., "09:00" or "14:25"
          */
         function minutesToTime(totalMinutes) {
             const hours = Math.floor(totalMinutes / 60);
@@ -160,9 +159,50 @@
         }
 
         /**
+         * Gets the current ISO week number for a given date.
+         * @param {Date} date - The date object to check.
+         * @returns {number} - The ISO week number.
+         */
+        function getWeekNumber(date) {
+            const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+            // Set to nearest Thursday: current date + 4 - current day number
+            // Make Sunday's day number 7
+            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+            // Get first day of year
+            const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+            // Calculate full weeks to nearest Thursday
+            const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+            return weekNo;
+        }
+        
+        /**
+         * Parses week range strings into an array of numbers.
+         * e.g., "34-36, 40" -> [34, 35, 36, 40]
+         * @param {string} rangeStr - The week range string.
+         * @returns {Array<number>}
+         */
+        function parseWeekRanges(rangeStr) {
+            const weeks = [];
+            if (!rangeStr || rangeStr === "0") {
+                return weeks;
+            }
+            
+            const parts = rangeStr.split(',');
+            for (const part of parts) {
+                if (part.includes('-')) {
+                    const [start, end] = part.split('-').map(Number);
+                    for (let i = start; i <= end; i++) {
+                        weeks.push(i);
+                    }
+                } else {
+                    weeks.push(Number(part));
+                }
+            }
+            return weeks;
+        }
+
+        /**
          * Parses the raw TSV data into a usable array of lesson objects.
-         * @param {string} tsv - The raw string data from the file.
-         * @returns {Array<Object>}
          */
         function parseLessons(tsv) {
             const lessons = [];
@@ -175,17 +215,16 @@
             
             const headers = lines[0].split('\t').map(h => h.trim());
             
-            // Find the column indices we care about
             const colIdx = {
                 group: headers.indexOf('group'),
                 subject: headers.indexOf('subject'),
                 day: headers.indexOf('day'),
                 starttime: headers.indexOf('starttime'),
                 length: headers.indexOf('length'),
-                room: headers.indexOf('room')
+                room: headers.indexOf('room'),
+                realweeks: headers.indexOf('realweeks') // <-- NEW
             };
 
-            // Check if all required columns exist
             for (const key in colIdx) {
                 if (colIdx[key] === -1) {
                     console.error(`Error: Required column "${key}" not found in data.`);
@@ -196,21 +235,17 @@
 
             for (let i = 1; i < lines.length; i++) {
                 const values = lines[i].split('\t');
-                
-                // Skip rows that aren't complete
                 if (values.length < headers.length) continue;
 
                 const day = values[colIdx.day].trim();
                 const startTimeStr = values[colIdx.starttime].trim().padStart(4, '0');
                 const length = parseInt(values[colIdx.length], 10);
                 
-                // Skip lessons with invalid day, time, or length
                 if (!["Mon", "Tue", "Wed", "Thu", "Fri"].includes(day) || !startTimeStr || length <= 0) {
                     continue;
                 }
 
                 const startTime = timeToMinutes(startTimeStr);
-                
                 const lesson = {
                     group: values[colIdx.group].trim(),
                     subject: values[colIdx.subject].trim(),
@@ -219,12 +254,11 @@
                     startTime: startTime,
                     endTime: startTime + length,
                     startTimeStr: minutesToTime(startTime),
-                    endTimeStr: minutesToTime(startTime + length)
+                    endTimeStr: minutesToTime(startTime + length),
+                    validWeeks: parseWeekRanges(values[colIdx.realweeks]) // <-- NEW
                 };
 
-                // Only add lessons that have a class group
                 if (lesson.group) {
-                    // Handle lessons for multiple groups (e.g., "4A,4B")
                     const groups = lesson.group.split(',');
                     for (const g of groups) {
                         const trimmedGroup = g.trim();
@@ -239,13 +273,8 @@
 
         /**
          * Gets the current "Now" and "Next" lessons for a specific class.
-         * @param {Array<Object>} allLessons - The parsed list of all lessons.
-         * @param {string} className - The class to check (e.g., "4A").
-         * @param {number} nowDay - Current day of week (1=Mon, 2=Tue, ..., 5=Fri).
-         * @param {number} nowMinutes - Current time in minutes from midnight.
-         * @returns {Object} - { now: Object | null, next: Object | null }
          */
-        function getNowAndNext(allLessons, className, nowDay, nowMinutes) {
+        function getNowAndNext(allLessons, className, nowDay, nowMinutes, currentWeek) {
             const dayMap = ["", "Mon", "Tue", "Wed", "Thu", "Fri"];
             const currentDayStr = dayMap[nowDay];
 
@@ -253,31 +282,37 @@
                 return { now: null, next: null }; // Weekend
             }
 
-            // Get all lessons for this class today, sorted by start time
+            // Get all lessons for this class today, FOR THIS WEEK
             const todayLessons = allLessons
-                .filter(l => l.group === className && l.day === currentDayStr)
+                .filter(l => 
+                    l.group === className && 
+                    l.day === currentDayStr &&
+                    l.validWeeks.includes(currentWeek) // <-- NEW FILTER
+                )
                 .sort((a, b) => a.startTime - b.startTime);
 
             let now = null;
             let next = null;
 
             for (const lesson of todayLessons) {
-                // Find "Now"
                 if (nowMinutes >= lesson.startTime && nowMinutes < lesson.endTime) {
                     now = lesson;
                 }
-                // Find first lesson that starts after "Now"
                 if (lesson.startTime > nowMinutes) {
-                    next = lesson;
-                    break; // Found the next lesson, stop searching
+                    if (!next) { // Only grab the very first "next" lesson
+                        next = lesson;
+                    }
                 }
             }
-
-            // If "Now" was found, "Next" might be the one after it
-            if (now && !next) {
-                const nowIndex = todayLessons.indexOf(now);
-                if (nowIndex < todayLessons.length - 1) {
-                    next = todayLessons[nowIndex + 1];
+            
+            // If "Now" was found, "Next" must be after "Now" ends
+            if (now) {
+                next = null; // Reset next, find the one after 'now' ends
+                for (const lesson of todayLessons) {
+                    if (lesson.startTime >= now.endTime) {
+                         next = lesson;
+                         break;
+                    }
                 }
             }
 
@@ -286,9 +321,6 @@
 
         /**
          * Creates the HTML for a single lesson event.
-         * @param {Object | null} lesson - The lesson object.
-         * @param {'now' | 'next' | 'break'} type - The type of event.
-         * @returns {string} - The HTML string for the event card.
          */
         function createEventHTML(lesson, type) {
             if (!lesson) {
@@ -318,7 +350,7 @@
                 <div class="event">
                     <div class="event-type ${type}">${type}</div>
                     <div class="event-subject">${lesson.subject} ${location}</div>
-                    <div class="event-details">${timeDetails}</div>
+                    <div class.event-details">${timeDetails}</div>
                 </div>`;
         }
 
@@ -334,24 +366,26 @@
                 return;
             }
 
-            // Get a unique, sorted list of all class groups
             const classNames = [...new Set(allLessons.map(l => l.group))]
-                .filter(name => /^[4-9][A-Z]$/.test(name)) // Filters for 4A, 4B, 9C etc.
+                .filter(name => /^[4-9][A-Z]$/.test(name)) 
                 .sort();
             
             const container = document.getElementById('dashboard-container');
-            container.innerHTML = ''; // Clear existing cards
+            container.innerHTML = ''; 
             
-            // Get current time
-            // We'll use Europe/Stockholm timezone to be accurate
+            // Get current time in Stockholm
             const now = new Date(new Date().toLocaleString("en-US", {timeZone: "Europe/Stockholm"}));
-            const nowDay = now.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+            const nowDay = now.getDay(); 
             const nowMinutes = (now.getHours() * 60) + now.getMinutes();
+            const currentWeek = getWeekNumber(now); // <-- NEW
 
-            // Update clock
+            // Update clock and week display
             const clockEl = document.getElementById('clock');
+            const weekEl = document.getElementById('week-display'); // <-- NEW
             const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+            
             clockEl.innerHTML = `${dayNames[nowDay]}, ${minutesToTime(nowMinutes)}`;
+            weekEl.innerHTML = `Displaying Schedule for: Week ${currentWeek}`; // <-- NEW
 
             if (nowDay === 0 || nowDay === 6) {
                 container.innerHTML = "<h2>It's the weekend.</h2>";
@@ -360,7 +394,7 @@
 
             // Generate a card for each class
             for (const className of classNames) {
-                const { now: nowLesson, next: nextLesson } = getNowAndNext(allLessons, className, nowDay, nowMinutes);
+                const { now: nowLesson, next: nextLesson } = getNowAndNext(allLessons, className, nowDay, nowMinutes, currentWeek); // <-- Pass currentWeek
                 
                 const card = document.createElement('div');
                 card.className = 'class-card';
