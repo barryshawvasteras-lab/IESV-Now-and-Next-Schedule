@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Now & Next Display</title>
+    <title>School Digital Signage</title>
     <style>
-        /* All your styles from before go here... */
         :root {
             --color-bg: #f4f7f6;
             --color-header-bg: #ffffff;
@@ -18,13 +17,62 @@
             --color-break: #7f8c8d;
             --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
-        body { font-family: var(--font-main); background-color: var(--color-bg); color: var(--color-text-primary); margin: 0; padding: 16px; }
-        h1 { color: var(--color-text-header); text-align: center; font-size: 2.0em; margin-bottom: 0; }
-        #clock { text-align: center; font-size: 1.2em; color: var(--color-text-secondary); margin-bottom: 20px; }
-        #week-display { text-align: center; font-size: 1.0em; font-weight: bold; color: var(--color-text-header); margin-bottom: 20px; margin-top: -16px; }
-        #dashboard-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
-        .class-card { background-color: var(--color-header-bg); border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); border: 1px solid var(--color-border); overflow: hidden; display: flex; flex-direction: column; }
-        .class-header { padding: 12px 16px; border-bottom: 1px solid var(--color-border); }
+        
+        body {
+            font-family: var(--font-main);
+            background-color: var(--color-bg);
+            color: var(--color-text-primary);
+            margin: 0;
+            padding: 16px;
+        }
+        
+        h1 {
+            color: var(--color-text-header);
+            text-align: center;
+            font-size: 2.0em;
+            margin-bottom: 0;
+        }
+
+        #clock {
+            text-align: center;
+            font-size: 1.2em;
+            color: var(--color-text-secondary);
+            margin-bottom: 20px;
+        }
+
+        #week-display {
+            text-align: center;
+            font-size: 1.0em;
+            font-weight: bold;
+            color: var(--color-text-header);
+            margin-bottom: 20px;
+            margin-top: -16px;
+        }
+        
+        .view-container { display: none; }
+        .view-container.active { display: block; }
+
+        #now-next-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+        
+        .class-card {
+            background-color: var(--color-header-bg);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--color-border);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .class-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--color-border);
+        }
+        
         .class-header h2 { margin: 0; font-size: 1.5em; color: var(--color-text-primary); }
         .class-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; flex-grow: 1; }
         .event { line-height: 1.4; }
@@ -32,9 +80,49 @@
         .event-type.now { color: var(--color-now); }
         .event-type.next { color: var(--color-next); }
         .event-type.break { color: var(--color-break); }
-        .event-subject { font-size: 1.2em; font-weight: 600; margin: 2px 0; }
-        .event-details { font-size: 0.9em; color: var(--color-text-secondary); }
+        
+        /* NEW: Styles for lesson items when there are multiple */
+        .event-item {
+            margin-bottom: 8px;
+        }
+        .event-item:last-child {
+            margin-bottom: 0;
+        }
+        .event-subject {
+            font-size: 1.2em;
+            font-weight: 600;
+            margin: 2px 0;
+        }
+        .event-teacher {
+            font-size: 0.9em;
+            color: var(--color-text-secondary);
+            font-weight: 600;
+        }
+        .event-details {
+            font-size: 0.9em;
+            color: var(--color-text-secondary);
+            margin-top: 8px; /* Push time to the bottom */
+        }
         .event-none { font-size: 1.0em; color: var(--color-text-secondary); flex-grow: 1; display: flex; align-items: center; justify-content: center; min-height: 40px; }
+
+        /* Styles for static pages */
+        .static-view {
+            background-color: var(--color-header-bg);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--color-border);
+            padding: 24px 40px;
+            margin: 0 auto;
+            max-width: 900px;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .static-view h2 { font-size: 3em; color: var(--color-text-header); text-align: center; margin-top: 0; margin-bottom: 24px; }
+        .static-view p, .static-view li { font-size: 1.8em; line-height: 1.6; color: var(--color-text-primary); }
+        .static-view ul { list-style-type: disc; padding-left: 40px; }
+
     </style>
 </head>
 <body>
@@ -42,37 +130,52 @@
     <h1>School Schedule</h1>
     <div id="clock">Loading...</div>
     <div id="week-display"></div>
-    <div id="dashboard-container">
-        <h2>Loading Schedule Data...</h2>
+
+    <div id="nowNextView" class="view-container active">
+        <div id="now-next-container">
+            </div>
     </div>
 
+    <div id="welcomeView" class="view-container">
+        <div class="static-view">
+            <h2>Welcome Guests!</h2>
+            <p>We are so glad to have you with us today. Please enjoy your visit!</p>
+        </div>
+    </div>
+
+    <div id="eventsView" class="view-container">
+        <div class="static-view">
+            <h2>Cool Events This Week</h2>
+            <ul>
+                <li>Spirit Day this Friday - Wear your school colors!</li>
+                <li>Science Fair applications are due.</li>
+                <li>Year 9 PRAO starts.</li>
+            </ul>
+        </div>
+    </div>
+
+
     <script>
-        // --- NO DATA HERE ---
-        // This script now fetches 'Lessons.txt' automatically.
+        let allLessons = [];
+        let currentView = 0;
 
-        let allLessons = []; // Global variable to hold the parsed lessons
+        function getURLParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
 
-        /**
-         * Converts a time string (HHMM) to total minutes from midnight.
-         */
         function timeToMinutes(timeStr) {
             const hours = parseInt(timeStr.substring(0, 2), 10);
             const minutes = parseInt(timeStr.substring(2, 4), 10);
             return (hours * 60) + minutes;
         }
 
-        /**
-         * Formats total minutes from midnight to a HH:MM string.
-         */
         function minutesToTime(totalMinutes) {
             const hours = Math.floor(totalMinutes / 60);
             const minutes = totalMinutes % 60;
             return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
         }
 
-        /**
-         * Gets the current ISO week number for a given date.
-         */
         function getWeekNumber(date) {
             const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
             d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
@@ -81,9 +184,6 @@
             return weekNo;
         }
         
-        /**
-         * Parses week range strings into an array of numbers.
-         */
         function parseWeekRanges(rangeStr) {
             const weeks = [];
             if (!rangeStr || rangeStr === "0") {
@@ -104,7 +204,7 @@
         }
 
         /**
-         * Parses the raw TSV data into a usable array of lesson objects.
+         * (MODIFIED) Parses the raw TSV data into a usable array of lesson objects.
          */
         function parseLessons(tsv) {
             const lessons = [];
@@ -124,14 +224,14 @@
                 starttime: headers.indexOf('starttime'),
                 length: headers.indexOf('length'),
                 room: headers.indexOf('room'),
-                realweeks: headers.indexOf('realweeks')
+                realweeks: headers.indexOf('realweeks'),
+                teacher: headers.indexOf('teacher')
             };
 
             for (const key in colIdx) {
                 if (colIdx[key] === -1) {
                     console.error(`Error: Required column "${key}" not found in data.`);
-                    alert(`Error: Data file is missing required column "${key}".`);
-                    return [];
+                    return []; 
                 }
             }
 
@@ -148,11 +248,11 @@
                 }
 
                 const startTime = timeToMinutes(startTimeStr);
-                const lesson = {
-                    group: values[colIdx.group].trim(),
+                const lessonData = {
                     subject: values[colIdx.subject].trim(),
                     day: day,
                     room: values[colIdx.room].trim(),
+                    teacher: values[colIdx.teacher].trim(),
                     startTime: startTime,
                     endTime: startTime + length,
                     startTimeStr: minutesToTime(startTime),
@@ -160,13 +260,17 @@
                     validWeeks: parseWeekRanges(values[colIdx.realweeks])
                 };
 
-                if (lesson.group) {
-                    const groups = lesson.group.split(',');
-                    for (const g of groups) {
-                        const trimmedGroup = g.trim();
-                        if (trimmedGroup) {
-                            lessons.push({ ...lesson, group: trimmedGroup });
-                        }
+                const groups = values[colIdx.group].trim().split(',');
+                for (const g of groups) {
+                    const trimmedGroup = g.trim();
+                    if (trimmedGroup) {
+                        // NEW: Create 'baseGroup' (e.g., "5A") from 'group' (e.g., "5A:1")
+                        const baseGroup = trimmedGroup.split(':')[0];
+                        lessons.push({ 
+                            ...lessonData, 
+                            group: trimmedGroup, // The full group name (e.g., 5A:1)
+                            baseGroup: baseGroup  // The base class name (e.g., 5A)
+                        });
                     }
                 }
             }
@@ -174,85 +278,135 @@
         }
 
         /**
-         * Gets the current "Now" and "Next" lessons for a specific class.
+         * (MODIFIED) Gets all lessons for a base class (e.g., "5A").
          */
-        function getNowAndNext(className, nowDay, nowMinutes, currentWeek) {
+        function getLessonsForDay(baseClassName, nowDay, currentWeek) {
             const dayMap = ["", "Mon", "Tue", "Wed", "Thu", "Fri"];
             const currentDayStr = dayMap[nowDay];
 
             if (!currentDayStr) {
-                return { now: null, next: null }; // Weekend
+                return []; // Weekend
             }
 
-            const todayLessons = allLessons
+            return allLessons
                 .filter(l => 
-                    l.group === className && 
+                    l.baseGroup === baseClassName && // Filter by baseGroup
                     l.day === currentDayStr &&
                     l.validWeeks.includes(currentWeek)
                 )
                 .sort((a, b) => a.startTime - b.startTime);
+        }
 
-            let now = null;
-            let next = null;
+        /**
+         * (MODIFIED) Gets all "Now" and "Next" lessons.
+         */
+        function getNowAndNext(todayLessons, nowMinutes) {
+            // Find all lessons happening now
+            const nowLessons = todayLessons.filter(l => 
+                nowMinutes >= l.startTime && nowMinutes < l.endTime
+            );
 
+            let nextLessons = [];
+            let nextStartTime = Infinity;
+            let referenceTime = nowMinutes; // Start looking from now
+
+            // If lessons are happening now, the next one must be after they end
+            if (nowLessons.length > 0) {
+                // Find the latest end time of all current lessons
+                const nowEndTime = Math.max(...nowLessons.map(l => l.endTime));
+                referenceTime = nowEndTime - 1; // Look for lessons starting at or after this time
+            }
+
+            // Find the *earliest* next start time
             for (const lesson of todayLessons) {
-                if (nowMinutes >= lesson.startTime && nowMinutes < lesson.endTime) {
-                    now = lesson;
-                }
-                if (lesson.startTime > nowMinutes) {
-                    if (!next) { 
-                        next = lesson;
-                    }
-                }
-            }
-            
-            if (now) {
-                next = null;
-                for (const lesson of todayLessons) {
-                    if (lesson.startTime >= now.endTime) {
-                         next = lesson;
-                         break;
-                    }
+                if (lesson.startTime > referenceTime && lesson.startTime < nextStartTime) {
+                    nextStartTime = lesson.startTime;
                 }
             }
 
-            return { now, next };
+            // Now, collect all lessons that start at that earliest next time
+            if (nextStartTime !== Infinity) {
+                nextLessons = todayLessons.filter(l => l.startTime === nextStartTime);
+            }
+
+            return { nowLessons, nextLessons }; // Plural
         }
 
         /**
-         * Creates the HTML for a single lesson event.
+         * (MODIFIED) Creates the HTML for an event block (Now or Next).
          */
-        function createEventHTML(lesson, type) {
-            if (!lesson) {
-                if (type === 'now') {
-                    return `<div class="event"><div class="event-type break">Now</div><div class="event-subject">Break / Lunch</div><div class="event-details">No class scheduled</div></div>`;
-                } else {
-                     return `<div class="event"><div class="event-type break">Next</div><div class="event-subject">End of Day</div><div class="event-details">No more classes scheduled</div></div>`;
-                }
-            }
-            
-            const location = lesson.room ? `(${lesson.room})` : '';
-            const timeDetails = type === 'now' 
-                ? `Ends at ${lesson.endTimeStr}` 
-                : `Starts at ${lesson.startTimeStr}`;
+        function createEventBlockHTML(lessons, type) {
+            const typeClass = type.toLowerCase(); // 'now' or 'next'
+            const typeLabel = type;
 
-            return `<div class="event"><div class="event-type ${type}">${type}</div><div class="event-subject">${lesson.subject} ${location}</div><div class="event-details">${timeDetails}</div></div>`;
+            // SCENARIO 1: No lessons (Break, Lunch, or End of Day)
+            if (!lessons || lessons.length === 0) {
+                const subject = (type === 'Now') ? 'Break / Lunch' : 'End of Day';
+                const details = (type === 'Now') ? 'No class scheduled' : 'No more classes scheduled';
+                return `
+                    <div class="event">
+                        <div class="event-type break">${typeLabel}</div>
+                        <div class="event-subject">${subject}</div>
+                        <div class="event-details">${details}</div>
+                    </div>`;
+            }
+
+            // SCENARIO 2: One or more lessons
+            // Use the time from the first lesson (all should be simultaneous)
+            const timeDetails = (type === 'Now') 
+                ? `Ends at ${lessons[0].endTimeStr}` 
+                : `Starts at ${lessons[0].startTimeStr}`;
+            
+            // Map all lessons to individual HTML strings
+            const lessonHtml = lessons.map(lesson => {
+                const location = lesson.room ? `(${lesson.room})` : '';
+                const teacher = lesson.teacher ? `${lesson.teacher}` : '';
+                
+                // Show subgroup name if it exists (e.g., "[1]" from "5A:1")
+                const groupName = lesson.group.includes(':') ? `[${lesson.group.split(':')[1]}] ` : '';
+
+                return `
+                    <div class="event-item">
+                        <div class="event-subject">${groupName}${lesson.subject} ${location}</div>
+                        <div class="event-teacher">${teacher}</div>
+                    </div>
+                `;
+            }).join('');
+
+            return `
+                <div class="event">
+                    <div class="event-type ${typeClass}">${typeLabel}</div>
+                    ${lessonHtml}
+                    <div class="event-details">${timeDetails}</div>
+                </div>
+            `;
         }
 
+
         /**
-         * Main function to update the dashboard. This re-runs every 30 seconds.
+         * (MODIFIED) Main function to UPDATE THE CONTENT of the dashboard.
          */
-        function updateDashboard() {
-            if (allLessons.length === 0) {
-                return; // Don't run if data isn't loaded
+        function updateAllDashboards() {
+            if (allLessons.length === 0) return;
+
+            const view = getURLParameter('view') || 'all'; 
+            
+            let classFilterRegex;
+            if (view === 'junior') {
+                classFilterRegex = /^[4-6][A-Z]$/; // Years 4, 5, 6
+            } else if (view === 'senior') {
+                classFilterRegex = /^[7-9][A-Z]$/; // Years 7, 8, 9
+            } else {
+                classFilterRegex = /^[4-9][A-Z]$/; // All
             }
 
-            const classNames = [...new Set(allLessons.map(l => l.group))]
-                .filter(name => /^[4-9][A-Z]$/.test(name)) 
+            // Build class list from baseGroup
+            const classNames = [...new Set(allLessons.map(l => l.baseGroup))]
+                .filter(name => classFilterRegex.test(name)) 
                 .sort();
             
-            const container = document.getElementById('dashboard-container');
-            container.innerHTML = ''; 
+            const nowNextContainer = document.getElementById('now-next-container');
+            nowNextContainer.innerHTML = ''; 
             
             const now = new Date(new Date().toLocaleString("en-US", {timeZone: "Europe/Stockholm"}));
             const nowDay = now.getDay(); 
@@ -262,57 +416,80 @@
             const clockEl = document.getElementById('clock');
             const weekEl = document.getElementById('week-display');
             const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-            
             clockEl.innerHTML = `${dayNames[nowDay]}, ${minutesToTime(nowMinutes)}`;
             weekEl.innerHTML = `Displaying Schedule for: Week ${currentWeek}`;
 
             if (nowDay === 0 || nowDay === 6) {
-                container.innerHTML = "<h2>It's the weekend.</h2>";
+                nowNextContainer.innerHTML = "<h2>It's the weekend.</h2>";
+                return;
+            }
+
+            if (classNames.length === 0) {
+                nowNextContainer.innerHTML = "<h2>No classes scheduled for this view.</h2>";
                 return;
             }
 
             for (const className of classNames) {
-                const { now: nowLesson, next: nextLesson } = getNowAndNext(className, nowDay, nowMinutes, currentWeek);
+                // className is now the baseGroup (e.g., "5A")
+                const todayLessons = getLessonsForDay(className, nowDay, currentWeek);
                 
-                const card = document.createElement('div');
-                card.className = 'class-card';
+                // Get plural lesson arrays
+                const { nowLessons, nextLessons } = getNowAndNext(todayLessons, nowMinutes);
                 
-                card.innerHTML = `
+                const nowNextCard = document.createElement('div');
+                nowNextCard.className = 'class-card';
+                nowNextCard.innerHTML = `
                     <div class="class-header"><h2>${className}</h2></div>
                     <div class="class-body">
-                        ${createEventHTML(nowLesson, 'now')}
-                        ${createEventHTML(nextLesson, 'next')}
+                        ${createEventBlockHTML(nowLessons, 'Now')}
+                        ${createEventBlockHTML(nextLessons, 'Next')}
                     </div>
                 `;
-                container.appendChild(card);
+                nowNextContainer.appendChild(nowNextCard);
             }
         }
 
         /**
-         * NEW: This function runs once on page load to fetch the data.
+         * This function "rolls" the page.
+         */
+        function switchView() {
+            const views = document.querySelectorAll('.view-container');
+            currentView = (currentView + 1) % views.length; 
+            
+            views.forEach((view, index) => {
+                if (index === currentView) {
+                    view.classList.add('active');
+                } else {
+                    view.classList.remove('active');
+                }
+            });
+        }
+
+        /**
+         * This function runs once on page load to fetch the data.
          */
         async function loadDataAndRun() {
             try {
-                // This tries to fetch the 'Lessons.txt' file
-                const response = await fetch('Lessons.txt'); 
+                const response = await fetch('Lessons.txt?cachebust=' + new Date().getTime());
                 if (!response.ok) {
                     throw new Error(`Failed to load Lessons.txt (Status: ${response.status})`);
                 }
                 const tsvData = await response.text();
                 
-                // Parse the data and store it in the global variable
                 allLessons = parseLessons(tsvData); 
                 
                 if (allLessons.length === 0) {
                     throw new Error("Could not parse any lessons from the data file.");
                 }
                 
-                updateDashboard(); // Run the display for the first time
-                setInterval(updateDashboard, 30000); // Set it to refresh every 30 seconds
-                
+                updateAllDashboards(); 
+                setInterval(updateAllDashboards, 30000); 
+                setInterval(switchView, 15000); 
+
             } catch (error) {
                 console.error(error);
-                document.getElementById('dashboard-container').innerHTML = `
+                const container = document.getElementById('now-next-container');
+                container.innerHTML = `
                     <h2 style="color: red;">Error: Could not load schedule.</h2>
                     <p>${error.message}</p>
                     <p>Please make sure the <b>Lessons.txt</b> file is uploaded to the same project and is public.</p>`;
