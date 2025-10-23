@@ -89,7 +89,7 @@
 </head>
 <body>
 
-    <h1>IES Västerås - Now and Next</h1>
+    <h1>School Digital Signage</h1>
     <div id="clock">Loading...</div>
     <div id="week-display"></div>
 
@@ -101,6 +101,10 @@
     <script>
         let allLessons = [];
 
+        /**
+         * Gets a parameter from the URL.
+         * e.g., index.html?view=junior -> getURLParameter('view') returns 'junior'
+         */
         function getURLParameter(name) {
             const urlParams = new URLSearchParams(window.location.search);
             return urlParams.get(name);
@@ -308,7 +312,8 @@
         function updateDashboard() {
             if (allLessons.length === 0) return;
 
-            const view = getURLParameter('view') || 'all'; 
+            // --- THIS IS THE FILTERING LOGIC ---
+            const view = getURLParameter('view') || 'all'; // default to 'all'
             
             let classFilterRegex;
             if (view === 'junior') {
@@ -322,6 +327,7 @@
             const classNames = [...new Set(allLessons.map(l => l.baseGroup))]
                 .filter(name => classFilterRegex.test(name)) 
                 .sort();
+            // --- END OF FILTERING LOGIC ---
             
             const nowNextContainer = document.getElementById('now-next-container');
             nowNextContainer.innerHTML = ''; 
@@ -388,8 +394,6 @@
                 
                 // Then set it to refresh schedule content every 30 seconds
                 setInterval(updateDashboard, 30000); 
-
-                // Removed the rotation interval and controls
 
             } catch (error) {
                 console.error(error);
