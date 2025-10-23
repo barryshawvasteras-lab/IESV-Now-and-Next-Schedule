@@ -49,9 +49,6 @@
             margin-top: -16px;
         }
         
-        .view-container { display: none; }
-        .view-container.active { display: block; }
-
         #now-next-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -81,133 +78,28 @@
         .event-type.next { color: var(--color-next); }
         .event-type.break { color: var(--color-break); }
         
-        .event-item {
-            margin-bottom: 8px;
-        }
-        .event-item:last-child {
-            margin-bottom: 0;
-        }
-        .event-subject {
-            font-size: 1.2em;
-            font-weight: 600;
-            margin: 2px 0;
-        }
-        .event-teacher {
-            font-size: 0.9em;
-            color: var(--color-text-secondary);
-            font-weight: 600;
-        }
-        .event-details {
-            font-size: 0.9em;
-            color: var(--color-text-secondary);
-            margin-top: 8px; /* Push time to the bottom */
-        }
+        .event-item { margin-bottom: 8px; }
+        .event-item:last-child { margin-bottom: 0; }
+        .event-subject { font-size: 1.2em; font-weight: 600; margin: 2px 0; }
+        .event-teacher { font-size: 0.9em; color: var(--color-text-secondary); font-weight: 600; }
+        .event-details { font-size: 0.9em; color: var(--color-text-secondary); margin-top: 8px; }
         .event-none { font-size: 1.0em; color: var(--color-text-secondary); flex-grow: 1; display: flex; align-items: center; justify-content: center; min-height: 40px; }
-
-        /* Styles for static pages */
-        .static-view {
-            background-color: var(--color-header-bg);
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            border: 1px solid var(--color-border);
-            padding: 24px 40px;
-            margin: 0 auto;
-            max-width: 900px;
-            min-height: 400px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-        .static-view h2 { font-size: 3em; color: var(--color-text-header); text-align: center; margin-top: 0; margin-bottom: 24px; }
-        .static-view p, .static-view li { font-size: 1.8em; line-height: 1.6; color: var(--color-text-primary); }
-        .static-view ul { list-style-type: disc; padding-left: 40px; }
-
-        /* * --- NEW: STYLES FOR CONTROLS ---
-         */
-        #controls {
-            position: fixed;
-            bottom: 10px;
-            right: 15px;
-            display: flex;
-            gap: 8px;
-            z-index: 1000;
-        }
-        .control-btn {
-            background-color: rgba(0, 0, 0, 0.4);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 44px;
-            height: 44px;
-            font-size: 20px;
-            line-height: 44px;
-            text-align: center;
-            cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            transition: background-color 0.2s;
-        }
-        .control-btn:hover {
-            background-color: rgba(0, 0, 0, 0.6);
-        }
-        .control-btn.hidden {
-            display: none;
-        }
-
 
     </style>
 </head>
 <body>
 
-    <h1>IES Västerås</h1>
+    <h1>School Digital Signage</h1>
     <div id="clock">Loading...</div>
     <div id="week-display"></div>
 
-    <div id="nowNextView" class="view-container active">
+    <div id="nowNextView">
         <div id="now-next-container">
             </div>
     </div>
 
-    <div id="welcomeView" class="view-container">
-        <div class="static-view">
-            <h2>Welcome Guests!</h2>
-            <p>We are so glad to have you with us today. Please enjoy your visit!</p>
-        </div>
-    </div>
-
-    <div id="eventsView" class="view-container">
-        <div class="static-view">
-            <h2>Cool Events This Week</h2>
-            <ul>
-                <li>Spirit Day this Friday - Wear your school colors!</li>
-                <li>Science Fair applications are due.</li>
-                <li>Year 9 PRAO starts.</li>
-            </ul>
-        </div>
-    </div>
-
-    <div id="controls">
-        <button id="btnBack" class="control-btn" title="Back">◀</button>
-        <button id="btnPause" class="control-btn" title="Pause">❚❚</button>
-        <button id="btnPlay" class="control-btn hidden" title="Play">▶</button>
-        <button id="btnNext" class="control-btn" title="Next">▶</button>
-    </div>
-
-
     <script>
         let allLessons = [];
-        let currentView = 0;
-        
-        // --- NEW: Variables for rotation control ---
-        let rotationTimer; // Stores the ID of the setInterval
-        let isPaused = false;
-        const ROTATION_SPEED = 15000; // 15 seconds in milliseconds
-
-        // --- NEW: Get button elements ---
-        const pauseBtn = document.getElementById('btnPause');
-        const playBtn = document.getElementById('btnPlay');
-        const nextBtn = document.getElementById('btnNext');
-        const backBtn = document.getElementById('btnBack');
-
 
         function getURLParameter(name) {
             const urlParams = new URLSearchParams(window.location.search);
@@ -410,7 +302,10 @@
             `;
         }
 
-        function updateAllDashboards() {
+        /**
+         * Main function to UPDATE THE CONTENT of the dashboard.
+         */
+        function updateDashboard() {
             if (allLessons.length === 0) return;
 
             const view = getURLParameter('view') || 'all'; 
@@ -472,52 +367,6 @@
         }
 
         /**
-         * (MODIFIED) This function "rolls" the page and resets the timer.
-         */
-        function switchView(direction = 'next') {
-            const views = document.querySelectorAll('.view-container');
-            const numViews = views.length;
-
-            if (direction === 'next') {
-                currentView = (currentView + 1) % numViews;
-            } else {
-                currentView = (currentView - 1 + numViews) % numViews;
-            }
-            
-            views.forEach((view, index) => {
-                if (index === currentView) {
-                    view.classList.add('active');
-                } else {
-                    view.classList.remove('active');
-                }
-            });
-
-            // If we are auto-rotating, reset the timer
-            // This prevents a manual click from being auto-advanced 1s later
-            if (!isPaused) {
-                clearInterval(rotationTimer);
-                rotationTimer = setInterval(() => switchView('next'), ROTATION_SPEED);
-            }
-        }
-
-        // --- NEW: Control functions ---
-        function pauseRotation() {
-            isPaused = true;
-            clearInterval(rotationTimer);
-            pauseBtn.classList.add('hidden');
-            playBtn.classList.remove('hidden');
-        }
-
-        function playRotation() {
-            isPaused = false;
-            playBtn.classList.add('hidden');
-            pauseBtn.classList.remove('hidden');
-            
-            // Go to next slide immediately, and restart the timer
-            switchView('next');
-        }
-
-        /**
          * This function runs once on page load to fetch the data.
          */
         async function loadDataAndRun() {
@@ -535,19 +384,12 @@
                 }
                 
                 // Run the update first to populate content
-                updateAllDashboards(); 
+                updateDashboard(); 
                 
                 // Then set it to refresh schedule content every 30 seconds
-                setInterval(updateAllDashboards, 30000); 
-                
-                // And set it to "roll" the page
-                rotationTimer = setInterval(() => switchView('next'), ROTATION_SPEED);
+                setInterval(updateDashboard, 30000); 
 
-                // --- NEW: Add event listeners for controls ---
-                pauseBtn.addEventListener('click', pauseRotation);
-                playBtn.addEventListener('click', playRotation);
-                nextBtn.addEventListener('click', () => switchView('next'));
-                backBtn.addEventListener('click', () => switchView('prev'));
+                // Removed the rotation interval and controls
 
             } catch (error) {
                 console.error(error);
@@ -565,4 +407,3 @@
     </script>
 </body>
 </html>
-
