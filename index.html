@@ -81,7 +81,6 @@
         .event-type.next { color: var(--color-next); }
         .event-type.break { color: var(--color-break); }
         
-        /* NEW: Styles for lesson items when there are multiple */
         .event-item {
             margin-bottom: 8px;
         }
@@ -123,11 +122,43 @@
         .static-view p, .static-view li { font-size: 1.8em; line-height: 1.6; color: var(--color-text-primary); }
         .static-view ul { list-style-type: disc; padding-left: 40px; }
 
+        /* * --- NEW: STYLES FOR CONTROLS ---
+         */
+        #controls {
+            position: fixed;
+            bottom: 10px;
+            right: 15px;
+            display: flex;
+            gap: 8px;
+            z-index: 1000;
+        }
+        .control-btn {
+            background-color: rgba(0, 0, 0, 0.4);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            font-size: 20px;
+            line-height: 44px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: background-color 0.2s;
+        }
+        .control-btn:hover {
+            background-color: rgba(0, 0, 0, 0.6);
+        }
+        .control-btn.hidden {
+            display: none;
+        }
+
+
     </style>
 </head>
 <body>
 
-    <h1>School Schedule</h1>
+    <h1>School Digital Signage</h1>
     <div id="clock">Loading...</div>
     <div id="week-display"></div>
 
@@ -154,10 +185,29 @@
         </div>
     </div>
 
+    <div id="controls">
+        <button id="btnBack" class="control-btn" title="Back">◀</button>
+        <button id="btnPause" class="control-btn" title="Pause">❚❚</button>
+        <button id="btnPlay" class="control-btn hidden" title="Play">▶</button>
+        <button id="btnNext" class="control-btn" title="Next">▶</button>
+    </div>
+
 
     <script>
         let allLessons = [];
         let currentView = 0;
+        
+        // --- NEW: Variables for rotation control ---
+        let rotationTimer; // Stores the ID of the setInterval
+        let isPaused = false;
+        const ROTATION_SPEED = 15000; // 15 seconds in milliseconds
+
+        // --- NEW: Get button elements ---
+        const pauseBtn = document.getElementById('btnPause');
+        const playBtn = document.getElementById('btnPlay');
+        const nextBtn = document.getElementById('btnNext');
+        const backBtn = document.getElementById('btnBack');
+
 
         function getURLParameter(name) {
             const urlParams = new URLSearchParams(window.location.search);
@@ -203,9 +253,6 @@
             return weeks;
         }
 
-        /**
-         * (MODIFIED) Parses the raw TSV data into a usable array of lesson objects.
-         */
         function parseLessons(tsv) {
             const lessons = [];
             const lines = tsv.trim().split(/[\r\n]+/);
@@ -234,7 +281,9 @@
                     return []; 
                 }
             }
-
+            
+            const validDays = ["Mon", "Tue", "Wed", "Thur", "Fri"];
+            
             for (let i = 1; i < lines.length; i++) {
                 const values = lines[i].split('\t');
                 if (values.length < headers.length) continue;
@@ -243,7 +292,7 @@
                 const startTimeStr = values[colIdx.starttime].trim().padStart(4, '0');
                 const length = parseInt(values[colIdx.length], 10);
                 
-                if (!["Mon", "Tue", "Wed", "Thu", "Fri"].includes(day) || !startTimeStr || length <= 0) {
+                if (!validDays.includes(day) || !startTimeStr || length <= 0) {
                     continue;
                 }
 
@@ -264,12 +313,11 @@
                 for (const g of groups) {
                     const trimmedGroup = g.trim();
                     if (trimmedGroup) {
-                        // NEW: Create 'baseGroup' (e.g., "5A") from 'group' (e.g., "5A:1")
                         const baseGroup = trimmedGroup.split(':')[0];
                         lessons.push({ 
                             ...lessonData, 
-                            group: trimmedGroup, // The full group name (e.g., 5A:1)
-                            baseGroup: baseGroup  // The base class name (e.g., 5A)
+                            group: trimmedGroup,
+                            baseGroup: baseGroup 
                         });
                     }
                 }
@@ -277,11 +325,8 @@
             return lessons;
         }
 
-        /**
-         * (MODIFIED) Gets all lessons for a base class (e.g., "5A").
-         */
         function getLessonsForDay(baseClassName, nowDay, currentWeek) {
-            const dayMap = ["", "Mon", "Tue", "Wed", "Thu", "Fri"];
+            const dayMap = ["", "Mon", "Tue", "Wed", "Thur", "Fri"];
             const currentDayStr = dayMap[nowDay];
 
             if (!currentDayStr) {
@@ -290,56 +335,44 @@
 
             return allLessons
                 .filter(l => 
-                    l.baseGroup === baseClassName && // Filter by baseGroup
+                    l.baseGroup === baseClassName &&
                     l.day === currentDayStr &&
                     l.validWeeks.includes(currentWeek)
                 )
                 .sort((a, b) => a.startTime - b.startTime);
         }
 
-        /**
-         * (MODIFIED) Gets all "Now" and "Next" lessons.
-         */
         function getNowAndNext(todayLessons, nowMinutes) {
-            // Find all lessons happening now
             const nowLessons = todayLessons.filter(l => 
                 nowMinutes >= l.startTime && nowMinutes < l.endTime
             );
 
             let nextLessons = [];
             let nextStartTime = Infinity;
-            let referenceTime = nowMinutes; // Start looking from now
+            let referenceTime = nowMinutes; 
 
-            // If lessons are happening now, the next one must be after they end
             if (nowLessons.length > 0) {
-                // Find the latest end time of all current lessons
                 const nowEndTime = Math.max(...nowLessons.map(l => l.endTime));
-                referenceTime = nowEndTime - 1; // Look for lessons starting at or after this time
+                referenceTime = nowEndTime - 1; 
             }
 
-            // Find the *earliest* next start time
             for (const lesson of todayLessons) {
                 if (lesson.startTime > referenceTime && lesson.startTime < nextStartTime) {
                     nextStartTime = lesson.startTime;
                 }
             }
 
-            // Now, collect all lessons that start at that earliest next time
             if (nextStartTime !== Infinity) {
                 nextLessons = todayLessons.filter(l => l.startTime === nextStartTime);
             }
 
-            return { nowLessons, nextLessons }; // Plural
+            return { nowLessons, nextLessons };
         }
 
-        /**
-         * (MODIFIED) Creates the HTML for an event block (Now or Next).
-         */
         function createEventBlockHTML(lessons, type) {
-            const typeClass = type.toLowerCase(); // 'now' or 'next'
+            const typeClass = type.toLowerCase();
             const typeLabel = type;
 
-            // SCENARIO 1: No lessons (Break, Lunch, or End of Day)
             if (!lessons || lessons.length === 0) {
                 const subject = (type === 'Now') ? 'Break / Lunch' : 'End of Day';
                 const details = (type === 'Now') ? 'No class scheduled' : 'No more classes scheduled';
@@ -351,18 +384,13 @@
                     </div>`;
             }
 
-            // SCENARIO 2: One or more lessons
-            // Use the time from the first lesson (all should be simultaneous)
             const timeDetails = (type === 'Now') 
                 ? `Ends at ${lessons[0].endTimeStr}` 
                 : `Starts at ${lessons[0].startTimeStr}`;
             
-            // Map all lessons to individual HTML strings
             const lessonHtml = lessons.map(lesson => {
                 const location = lesson.room ? `(${lesson.room})` : '';
                 const teacher = lesson.teacher ? `${lesson.teacher}` : '';
-                
-                // Show subgroup name if it exists (e.g., "[1]" from "5A:1")
                 const groupName = lesson.group.includes(':') ? `[${lesson.group.split(':')[1]}] ` : '';
 
                 return `
@@ -382,10 +410,6 @@
             `;
         }
 
-
-        /**
-         * (MODIFIED) Main function to UPDATE THE CONTENT of the dashboard.
-         */
         function updateAllDashboards() {
             if (allLessons.length === 0) return;
 
@@ -400,7 +424,6 @@
                 classFilterRegex = /^[4-9][A-Z]$/; // All
             }
 
-            // Build class list from baseGroup
             const classNames = [...new Set(allLessons.map(l => l.baseGroup))]
                 .filter(name => classFilterRegex.test(name)) 
                 .sort();
@@ -415,7 +438,9 @@
 
             const clockEl = document.getElementById('clock');
             const weekEl = document.getElementById('week-display');
+            
             const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+            
             clockEl.innerHTML = `${dayNames[nowDay]}, ${minutesToTime(nowMinutes)}`;
             weekEl.innerHTML = `Displaying Schedule for: Week ${currentWeek}`;
 
@@ -430,10 +455,7 @@
             }
 
             for (const className of classNames) {
-                // className is now the baseGroup (e.g., "5A")
                 const todayLessons = getLessonsForDay(className, nowDay, currentWeek);
-                
-                // Get plural lesson arrays
                 const { nowLessons, nextLessons } = getNowAndNext(todayLessons, nowMinutes);
                 
                 const nowNextCard = document.createElement('div');
@@ -450,11 +472,17 @@
         }
 
         /**
-         * This function "rolls" the page.
+         * (MODIFIED) This function "rolls" the page and resets the timer.
          */
-        function switchView() {
+        function switchView(direction = 'next') {
             const views = document.querySelectorAll('.view-container');
-            currentView = (currentView + 1) % views.length; 
+            const numViews = views.length;
+
+            if (direction === 'next') {
+                currentView = (currentView + 1) % numViews;
+            } else {
+                currentView = (currentView - 1 + numViews) % numViews;
+            }
             
             views.forEach((view, index) => {
                 if (index === currentView) {
@@ -463,6 +491,30 @@
                     view.classList.remove('active');
                 }
             });
+
+            // If we are auto-rotating, reset the timer
+            // This prevents a manual click from being auto-advanced 1s later
+            if (!isPaused) {
+                clearInterval(rotationTimer);
+                rotationTimer = setInterval(() => switchView('next'), ROTATION_SPEED);
+            }
+        }
+
+        // --- NEW: Control functions ---
+        function pauseRotation() {
+            isPaused = true;
+            clearInterval(rotationTimer);
+            pauseBtn.classList.add('hidden');
+            playBtn.classList.remove('hidden');
+        }
+
+        function playRotation() {
+            isPaused = false;
+            playBtn.classList.add('hidden');
+            pauseBtn.classList.remove('hidden');
+            
+            // Go to next slide immediately, and restart the timer
+            switchView('next');
         }
 
         /**
@@ -482,9 +534,20 @@
                     throw new Error("Could not parse any lessons from the data file.");
                 }
                 
+                // Run the update first to populate content
                 updateAllDashboards(); 
+                
+                // Then set it to refresh schedule content every 30 seconds
                 setInterval(updateAllDashboards, 30000); 
-                setInterval(switchView, 15000); 
+                
+                // And set it to "roll" the page
+                rotationTimer = setInterval(() => switchView('next'), ROTATION_SPEED);
+
+                // --- NEW: Add event listeners for controls ---
+                pauseBtn.addEventListener('click', pauseRotation);
+                playBtn.addEventListener('click', playRotation);
+                nextBtn.addEventListener('click', () => switchView('next'));
+                backBtn.addEventListener('click', () => switchView('prev'));
 
             } catch (error) {
                 console.error(error);
