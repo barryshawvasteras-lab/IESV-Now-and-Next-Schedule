@@ -24,7 +24,22 @@
             color: var(--color-text-primary);
             margin: 0;
             padding: 16px;
+            padding-top: 80px; /* Add padding at the top to make space for the fixed logo */
         }
+
+        /* --- NEW: Styles for the Logo --- */
+        #logo-container {
+            position: fixed; /* Keep it fixed at the top-left */
+            top: 15px;
+            left: 20px;
+            z-index: 1000; /* Ensure it's above other content */
+        }
+        #logo-img {
+            height: 50px; /* Adjust height as needed */
+            width: auto; /* Maintain aspect ratio */
+            display: block;
+        }
+        /* --- End of Logo Styles --- */
         
         h1 {
             color: var(--color-text-header);
@@ -89,6 +104,9 @@
 </head>
 <body>
 
+    <div id="logo-container">
+        <img id="logo-img" src="logo.png" alt="School Logo"> 
+    </div>
     <h1>School Digital Signage</h1>
     <div id="clock">Loading...</div>
     <div id="week-display"></div>
@@ -101,10 +119,6 @@
     <script>
         let allLessons = [];
 
-        /**
-         * Gets a parameter from the URL.
-         * e.g., index.html?view=junior -> getURLParameter('view') returns 'junior'
-         */
         function getURLParameter(name) {
             const urlParams = new URLSearchParams(window.location.search);
             return urlParams.get(name);
@@ -306,14 +320,10 @@
             `;
         }
 
-        /**
-         * Main function to UPDATE THE CONTENT of the dashboard.
-         */
         function updateDashboard() {
             if (allLessons.length === 0) return;
 
-            // --- THIS IS THE FILTERING LOGIC ---
-            const view = getURLParameter('view') || 'all'; // default to 'all'
+            const view = getURLParameter('view') || 'all'; 
             
             let classFilterRegex;
             if (view === 'junior') {
@@ -327,7 +337,6 @@
             const classNames = [...new Set(allLessons.map(l => l.baseGroup))]
                 .filter(name => classFilterRegex.test(name)) 
                 .sort();
-            // --- END OF FILTERING LOGIC ---
             
             const nowNextContainer = document.getElementById('now-next-container');
             nowNextContainer.innerHTML = ''; 
@@ -372,9 +381,6 @@
             }
         }
 
-        /**
-         * This function runs once on page load to fetch the data.
-         */
         async function loadDataAndRun() {
             try {
                 const response = await fetch('Lessons.txt?cachebust=' + new Date().getTime());
@@ -389,10 +395,7 @@
                     throw new Error("Could not parse any lessons from the data file.");
                 }
                 
-                // Run the update first to populate content
                 updateDashboard(); 
-                
-                // Then set it to refresh schedule content every 30 seconds
                 setInterval(updateDashboard, 30000); 
 
             } catch (error) {
@@ -405,7 +408,6 @@
             }
         }
 
-        // --- Run the application ---
         loadDataAndRun(); 
 
     </script>
