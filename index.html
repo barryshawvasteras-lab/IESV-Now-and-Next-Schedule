@@ -126,6 +126,12 @@
     </div>
 
     <script>
+        // --- THIS IS THE LIST YOU CAN EDIT ---
+        // Add any staff codes you want to exclude into this list.
+        const excludedStaff = ["VikCos"];
+        // e.g., const excludedStaff = ["VikCos", "OtherName", "NewStaff"];
+        // -------------------------------------
+
         let allLessons = [];
 
         function getURLParameter(name) {
@@ -172,6 +178,9 @@
             return weeks;
         }
 
+        /**
+         * (MODIFIED) Parses the raw TSV data into a usable array of lesson objects.
+         */
         function parseLessons(tsv) {
             const lessons = [];
             const lines = tsv.trim().split(/[\r\n]+/);
@@ -207,6 +216,16 @@
                 const values = lines[i].split('\t');
                 if (values.length < headers.length) continue;
 
+                // --- NEW: Filter to exclude staff ---
+                const teacherStr = values[colIdx.teacher].trim();
+                const teachers = teacherStr.split(',').map(t => t.trim()); // Handle multiple teachers
+                const isExcluded = teachers.some(teacher => excludedStaff.includes(teacher));
+
+                if (isExcluded) {
+                    continue; // Skip this lesson entirely
+                }
+                // --- END OF FILTER ---
+
                 const day = values[colIdx.day].trim();
                 const startTimeStr = values[colIdx.starttime].trim().padStart(4, '0');
                 const length = parseInt(values[colIdx.length], 10);
@@ -220,7 +239,7 @@
                     subject: values[colIdx.subject].trim(),
                     day: day,
                     room: values[colIdx.room].trim(),
-                    teacher: values[colIdx.teacher].trim(),
+                    teacher: teacherStr,
                     startTime: startTime,
                     endTime: startTime + length,
                     startTimeStr: minutesToTime(startTime),
@@ -245,8 +264,7 @@
         }
 
         /**
-         * (MODIFIED) Gets all lessons for a base class (e.g., "7A").
-         * This now also finds "year-level" classes like "7SVA1", "7Prep", etc.
+         * Gets all lessons for a base class (e.g., "7A").
          */
         function getLessonsForDay(baseClassName, nowDay, currentWeek) {
             const dayMap = ["", "Mon", "Tue", "Wed", "Thur", "Fri"];
@@ -256,30 +274,20 @@
                 return []; // Weekend
             }
 
-            // --- NEW LOGIC ---
             const year = baseClassName.charAt(0); // e.g., "7" from "7A"
             const mainClassRegex = /^[4-9][A-Z]$/; // Regex to find main classes like 4A, 7B
 
             const lessons = allLessons.filter(l => {
-                // Check for day and week match first
                 if (l.day !== currentDayStr || !l.validWeeks.includes(currentWeek)) {
                     return false;
                 }
-
-                // Condition 1: The lesson's base group is the class itself (e.g., "7A" === "7A")
                 const isForThisClass = l.baseGroup === baseClassName;
-
-                // Condition 2: The lesson's group starts with the same year number (e.g., "7SVA1" starts with "7")
-                // AND the lesson's base group is *not* a standard main class (e.g., "7SVA1" is not "7B" or "7C")
                 const isForThisYear = l.group.startsWith(year) && !mainClassRegex.test(l.baseGroup);
-
                 return (isForThisClass || isForThisYear);
             });
             
-            // Return unique lessons (in case of overlaps) and sort by time
             const uniqueLessons = [...new Map(lessons.map(l => [l.group + l.startTime, l])).values()];
             return uniqueLessons.sort((a, b) => a.startTime - b.startTime);
-            // --- END OF NEW LOGIC ---
         }
 
         function getNowAndNext(todayLessons, nowMinutes) {
@@ -330,20 +338,21 @@
             
             const lessonHtml = lessons.map(lesson => {
                 const location = lesson.room ? `(${lesson.room})` : '';
-                const teacher = lesson.teacher ? `${lesson.teacher}` : '';
                 
-                // --- NEW LOGIC for group name display ---
+                // --- NEW: Filter out excluded staff from teacher display ---
+                const teachers = lesson.teacher.split(',')
+                                    .map(t => t.trim())
+                                    .filter(t => !excludedStaff.includes(t));
+                const teacher = teachers.join(', ');
+                // --- END OF FILTER ---
+                
                 const mainClassRegex = /^[4-9][A-Z]$/;
                 let groupName = '';
-                // If it's a split main class (e.g., "7A:1"), show "[1]"
                 if (lesson.group.includes(':')) {
                     groupName = `[${lesson.group.split(':')[1]}] `;
-                // If it's a year-level class (e.g., "7SVA1"), show the name, but shorten it
                 } else if (!mainClassRegex.test(lesson.baseGroup)) {
-                    // Shortens "7SVA1" to "SVA1" or "4Prep" to "Prep"
                     groupName = `[${lesson.baseGroup.substring(1)}] `; 
                 }
-                // --- END OF NEW LOGIC ---
 
                 return `
                     <div class="event-item">
@@ -376,10 +385,9 @@
                 classFilterRegex = /^[4-9][A-Z]$/; // All
             }
             
-            // This list is now correctly only "4A", "4B", "5A", etc.
             const classNames = [...new Set(allLessons.map(l => l.baseGroup))]
                 .filter(name => /^[4-9][A-Z]$/.test(name)) 
-                .filter(name => classFilterRegex.test(name)) // Apply junior/senior filter
+                .filter(name => classFilterRegex.test(name))
                 .sort();
             
             const nowNextContainer = document.getElementById('now-next-container');
