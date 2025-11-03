@@ -15,12 +15,10 @@
             --color-now: #27ae60;
             --color-next: #2980b9;
             --color-break: #7f8c8d;
-            /* This is the font we have been using */
             --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
         
         body {
-            /* This line applies the font */
             font-family: var(--font-main);
             background-color: var(--color-bg);
             color: var(--color-text-primary);
@@ -128,7 +126,6 @@
     </div>
 
     <script>
-        // --- (All your JavaScript code is identical) ---
         let allLessons = [];
 
         function getURLParameter(name) {
@@ -247,6 +244,10 @@
             return lessons;
         }
 
+        /**
+         * (MODIFIED) Gets all lessons for a base class (e.g., "7A").
+         * This now also finds "year-level" classes like "7SVA1", "7Prep", etc.
+         */
         function getLessonsForDay(baseClassName, nowDay, currentWeek) {
             const dayMap = ["", "Mon", "Tue", "Wed", "Thur", "Fri"];
             const currentDayStr = dayMap[nowDay];
@@ -255,13 +256,30 @@
                 return []; // Weekend
             }
 
-            return allLessons
-                .filter(l => 
-                    l.baseGroup === baseClassName &&
-                    l.day === currentDayStr &&
-                    l.validWeeks.includes(currentWeek)
-                )
-                .sort((a, b) => a.startTime - b.startTime);
+            // --- NEW LOGIC ---
+            const year = baseClassName.charAt(0); // e.g., "7" from "7A"
+            const mainClassRegex = /^[4-9][A-Z]$/; // Regex to find main classes like 4A, 7B
+
+            const lessons = allLessons.filter(l => {
+                // Check for day and week match first
+                if (l.day !== currentDayStr || !l.validWeeks.includes(currentWeek)) {
+                    return false;
+                }
+
+                // Condition 1: The lesson's base group is the class itself (e.g., "7A" === "7A")
+                const isForThisClass = l.baseGroup === baseClassName;
+
+                // Condition 2: The lesson's group starts with the same year number (e.g., "7SVA1" starts with "7")
+                // AND the lesson's base group is *not* a standard main class (e.g., "7SVA1" is not "7B" or "7C")
+                const isForThisYear = l.group.startsWith(year) && !mainClassRegex.test(l.baseGroup);
+
+                return (isForThisClass || isForThisYear);
+            });
+            
+            // Return unique lessons (in case of overlaps) and sort by time
+            const uniqueLessons = [...new Map(lessons.map(l => [l.group + l.startTime, l])).values()];
+            return uniqueLessons.sort((a, b) => a.startTime - b.startTime);
+            // --- END OF NEW LOGIC ---
         }
 
         function getNowAndNext(todayLessons, nowMinutes) {
@@ -313,7 +331,19 @@
             const lessonHtml = lessons.map(lesson => {
                 const location = lesson.room ? `(${lesson.room})` : '';
                 const teacher = lesson.teacher ? `${lesson.teacher}` : '';
-                const groupName = lesson.group.includes(':') ? `[${lesson.group.split(':')[1]}] ` : '';
+                
+                // --- NEW LOGIC for group name display ---
+                const mainClassRegex = /^[4-9][A-Z]$/;
+                let groupName = '';
+                // If it's a split main class (e.g., "7A:1"), show "[1]"
+                if (lesson.group.includes(':')) {
+                    groupName = `[${lesson.group.split(':')[1]}] `;
+                // If it's a year-level class (e.g., "7SVA1"), show the name, but shorten it
+                } else if (!mainClassRegex.test(lesson.baseGroup)) {
+                    // Shortens "7SVA1" to "SVA1" or "4Prep" to "Prep"
+                    groupName = `[${lesson.baseGroup.substring(1)}] `; 
+                }
+                // --- END OF NEW LOGIC ---
 
                 return `
                     <div class="event-item">
@@ -345,9 +375,11 @@
             } else {
                 classFilterRegex = /^[4-9][A-Z]$/; // All
             }
-
+            
+            // This list is now correctly only "4A", "4B", "5A", etc.
             const classNames = [...new Set(allLessons.map(l => l.baseGroup))]
-                .filter(name => classFilterRegex.test(name)) 
+                .filter(name => /^[4-9][A-Z]$/.test(name)) 
+                .filter(name => classFilterRegex.test(name)) // Apply junior/senior filter
                 .sort();
             
             const nowNextContainer = document.getElementById('now-next-container');
@@ -425,4 +457,3 @@
     </script>
 </body>
 </html>
-
