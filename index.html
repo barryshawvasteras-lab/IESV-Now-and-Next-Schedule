@@ -3,10 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Now & Next</title>
+    <title>School Digital Signage</title>
     <style>
         :root {
             /* ... (all your color variables) ... */
+            --color-bg: #f4f7f6;
+            --color-header-bg: #ffffff;
+            --color-border: #e0e0e0;
+            --color-text-primary: #2c3e50;
+            --color-text-secondary: #5a7a9b;
+            --color-text-header: #34495e;
+            --color-now: #27ae60;
+            --color-next: #2980b9;
+            --color-break: #7f8c8d;
+            --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
         
         body {
@@ -15,41 +25,68 @@
             color: var(--color-text-primary);
             margin: 0;
             padding: 16px;
-            /* --- CHANGE 1: ---
-               Make sure padding-top is REMOVED from here.
-            */
         }
 
-        /* --- CHANGE 2: ---
-           The logo style is now much simpler.
-           No "position" property.
-        */
-        #logo-container {
-            /* Make sure this is at the top of the page */
-            width: 100%; 
-            /* You can use this to center it, or use text-align: left; */
-            text-align: left; 
-            padding-bottom: 10px; /* Some space below logo */
+        /* --- NEW: Header Styles for 3-Column Layout --- */
+        #header {
+            display: flex; /* Creates side-by-side columns */
+            align-items: center; /* Vertically centers everything in the row */
+            margin-bottom: 20px; /* Space below the header */
         }
+
+        #logo-container {
+            flex: 1; /* Takes up 1 part of the space */
+            text-align: left; /* Aligns logo to the far left */
+        }
+        
         #logo-img {
             height: 100px; /* Your doubled size */
             width: auto;
-            display: inline-block; /* Treat it like text */
+            display: inline-block; 
         }
-        /* --- End of Logo Styles --- */
+
+        #header-text {
+            flex: 1; /* Takes up 1 part of the space */
+            text-align: center; /* Centers the text */
+        }
         
+        #header-spacer {
+            flex: 1; /* Takes up 1 part, balancing the logo */
+        }
+        /* --- End of Header Styles --- */
+        
+
         h1 {
             color: var(--color-text-header);
-            text-align: center;
+            text-align: center; /* Keep text centered within its block */
             font-size: 2.0em;
-            margin-bottom: 0;
+            margin-top: 0;
+            margin-bottom: 4px; /* Tighter spacing */
         }
 
-        /* ... (rest of your CSS styles) ... */
+        #clock {
+            text-align: center; /* Keep text centered within its block */
+            font-size: 1.2em;
+            color: var(--color-text-secondary);
+            margin-bottom: 4px; /* Tighter spacing */
+        }
 
-        #clock { text-align: center; font-size: 1.2em; color: var(--color-text-secondary); margin-bottom: 20px; }
-        #week-display { text-align: center; font-size: 1.0em; font-weight: bold; color: var(--color-text-header); margin-bottom: 20px; margin-top: -16px; }
-        #now-next-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+        #week-display {
+            text-align: center; /* Keep text centered within its block */
+            font-size: 1.0em;
+            font-weight: bold;
+            color: var(--color-text-header);
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+        
+        #now-next-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+        
+        /* ... (rest of your CSS is unchanged) ... */
         .class-card { background-color: var(--color-header-bg); border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); border: 1px solid var(--color-border); overflow: hidden; display: flex; flex-direction: column; }
         .class-header { padding: 12px 16px; border-bottom: 1px solid var(--color-border); }
         .class-header h2 { margin: 0; font-size: 1.5em; color: var(--color-text-primary); }
@@ -70,14 +107,21 @@
 </head>
 <body>
 
-    <div id="logo-container">
-        <img id="logo-img" src="logo.png" alt="School Logo"> 
+    <div id="header">
+        
+        <div id="logo-container">
+            <img id="logo-img" src="logo.png" alt="School Logo"> 
+        </div>
+
+        <div id="header-text">
+            <h1>Now & Next</h1>
+            <div id="clock">Loading...</div>
+            <div id="week-display"></div>
+        </div>
+        
+        <div id="header-spacer"></div>
+        
     </div>
-
-    <h1>Now & Next</h1>
-    <div id="clock">Loading...</div>
-    <div id="week-display"></div>
-
     <div id="nowNextView">
         <div id="now-next-container">
             </div>
@@ -381,5 +425,3 @@
     </script>
 </body>
 </html>
-
-
