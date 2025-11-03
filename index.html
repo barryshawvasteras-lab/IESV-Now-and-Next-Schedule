@@ -6,16 +6,7 @@
     <title>School Digital Signage</title>
     <style>
         :root {
-            --color-bg: #f4f7f6;
-            --color-header-bg: #ffffff;
-            --color-border: #e0e0e0;
-            --color-text-primary: #2c3e50;
-            --color-text-secondary: #5a7a9b;
-            --color-text-header: #34495e;
-            --color-now: #27ae60;
-            --color-next: #2980b9;
-            --color-break: #7f8c8d;
-            --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            /* ... (all your color variables) ... */
         }
         
         body {
@@ -24,20 +15,26 @@
             color: var(--color-text-primary);
             margin: 0;
             padding: 16px;
-            
+            /* --- CHANGE 1: ---
+               Make sure padding-top is REMOVED from here.
+            */
         }
 
-        /* --- NEW: Styles for the Logo --- */
+        /* --- CHANGE 2: ---
+           The logo style is now much simpler.
+           No "position" property.
+        */
         #logo-container {
-            position: fixed; /* Keep it fixed at the top-left */
-            top: 15px;
-            left: 20px;
-            z-index: 1000; /* Ensure it's above other content */
+            /* Make sure this is at the top of the page */
+            width: 100%; 
+            /* You can use this to center it, or use text-align: left; */
+            text-align: left; 
+            padding-bottom: 10px; /* Some space below logo */
         }
         #logo-img {
-            height: 90px; /* Adjust height as needed */
-            width: auto; /* Maintain aspect ratio */
-            display: block;
+            height: 100px; /* Your doubled size */
+            width: auto;
+            display: inline-block; /* Treat it like text */
         }
         /* --- End of Logo Styles --- */
         
@@ -48,43 +45,13 @@
             margin-bottom: 0;
         }
 
-        #clock {
-            text-align: center;
-            font-size: 1.2em;
-            color: var(--color-text-secondary);
-            margin-bottom: 20px;
-        }
+        /* ... (rest of your CSS styles) ... */
 
-        #week-display {
-            text-align: center;
-            font-size: 1.0em;
-            font-weight: bold;
-            color: var(--color-text-header);
-            margin-bottom: 20px;
-            margin-top: -16px;
-        }
-        
-        #now-next-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 16px;
-        }
-        
-        .class-card {
-            background-color: var(--color-header-bg);
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            border: 1px solid var(--color-border);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .class-header {
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--color-border);
-        }
-        
+        #clock { text-align: center; font-size: 1.2em; color: var(--color-text-secondary); margin-bottom: 20px; }
+        #week-display { text-align: center; font-size: 1.0em; font-weight: bold; color: var(--color-text-header); margin-bottom: 20px; margin-top: -16px; }
+        #now-next-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+        .class-card { background-color: var(--color-header-bg); border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); border: 1px solid var(--color-border); overflow: hidden; display: flex; flex-direction: column; }
+        .class-header { padding: 12px 16px; border-bottom: 1px solid var(--color-border); }
         .class-header h2 { margin: 0; font-size: 1.5em; color: var(--color-text-primary); }
         .class-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; flex-grow: 1; }
         .event { line-height: 1.4; }
@@ -92,7 +59,6 @@
         .event-type.now { color: var(--color-now); }
         .event-type.next { color: var(--color-next); }
         .event-type.break { color: var(--color-break); }
-        
         .event-item { margin-bottom: 8px; }
         .event-item:last-child { margin-bottom: 0; }
         .event-subject { font-size: 1.2em; font-weight: 600; margin: 2px 0; }
@@ -107,6 +73,7 @@
     <div id="logo-container">
         <img id="logo-img" src="logo.png" alt="School Logo"> 
     </div>
+
     <h1>School Digital Signage</h1>
     <div id="clock">Loading...</div>
     <div id="week-display"></div>
@@ -117,6 +84,7 @@
     </div>
 
     <script>
+        // --- (All your JavaScript code is identical) ---
         let allLessons = [];
 
         function getURLParameter(name) {
@@ -413,7 +381,3 @@
     </script>
 </body>
 </html>
-
-
-
-
