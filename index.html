@@ -5,192 +5,102 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Now & Next</title>
     <style>
-        /*
-        * Global reset to make the app fit the screen perfectly.
-        * This is the main fix for your scrolling problem.
-        */
-        html, body {
-            margin: 0;
-            padding: 0;
-            height: 100vh; /* 100% of the Viewport (Screen) Height */
-            width: 100vw;  /* 100% of the Viewport (Screen) Width */
-            overflow: hidden; /* This hides the scrollbar */
-            
-            /* Standard font and background for the page */
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #333; /* Dark grey background */
-            color: white;
-            
-            /*
-            * This is the magic trick.
-            * It sets the base font size to be 1.5% of the screen's height.
-            * Now, all our OTHER font sizes (using 'rem') will scale with the screen!
-            */
-            font-size: 1.5vh;
-            
-            /* Ensure the body and its content are laid out as a column */
-            display: flex;
-            flex-direction: column;
-            box-sizing: border-box;
+        :root {
+            --color-bg: #f4f7f6;
+            --color-header-bg: #ffffff;
+            --color-border: #e0e0e0;
+            --color-text-primary: #2c3e50;
+            --color-text-secondary: #5a7a9b;
+            --color-text-header: #34495e;
+            --color-now: #27ae60;
+            --color-next: #2980b9;
+            --color-break: #7f8c8d;
+            --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
-
-        /*
-        * This is the main container for your app.
-        * It uses flexbox to arrange items vertically.
-        */
+        
         body {
-            padding: 2vh 2vw; /* Use viewport units for padding */
+            font-family: var(--font-main);
+            background-color: var(--color-bg);
+            color: var(--color-text-primary);
+            margin: 0;
+            padding: 16px;
         }
 
         /* --- Header Styles for 3-Column Layout --- */
         #header {
             display: flex;
             align-items: center;
-            margin-bottom: 1.5vh; /* Use viewport height for margin */
-            flex-shrink: 0; /* Prevents header from shrinking */
+            margin-bottom: 20px;
         }
 
         #logo-container {
             flex: 1;
             text-align: left;
         }
-
+        
         #logo-img {
-            height: 8vh; /* Scale logo with screen height */
+            height: 100px;
             width: auto;
-            display: inline-block;
+            display: inline-block; 
         }
 
         #header-text {
             flex: 1;
             text-align: center;
         }
-
+        
         #header-spacer {
             flex: 1;
         }
-
         /* --- End of Header Styles --- */
+        
 
         h1 {
-            color: #ffa500; /* Orange color for titles */
+            color: var(--color-text-header);
             text-align: center;
-            font-size: 2.5rem;   /* Scales with base font-size */
-            margin: 0;
+            font-size: 2.0em;
+            margin-top: 0;
+            margin-bottom: 4px;
         }
 
         #clock {
             text-align: center;
-            font-size: 1.8rem; /* Scales */
-            color: #fff;
-            margin-bottom: 0.25rem;
+            font-size: 1.2em;
+            color: var(--color-text-secondary);
+            margin-bottom: 4px;
         }
 
         #week-display {
             text-align: center;
-            font-size: 1.5rem; /* Scales */
+            font-size: 1.0em;
             font-weight: bold;
-            color: #eee;
-            margin: 0;
+            color: var(--color-text-header);
+            margin-top: 0;
+            margin-bottom: 0;
         }
-
-        /* This is the new container for the scrolling content */
-        #nowNextView {
-            flex-grow: 1; /* Makes this fill the remaining space */
-            overflow-y: hidden; /* No scrollbar here */
-            overflow-x: hidden;
-        }
-
+        
         #now-next-container {
             display: grid;
-            /* This will fit as many 300px columns as it can */
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
-            gap: 1.5vh; /* Scale gap with screen */
-            
-            /* This is a fallback for very tall screens */
-            /* On most screens, this won't be used, but it prevents 
-            a single column from being 100% tall */
-            max-height: 75vh;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
         }
-
-        .class-card {
-            background-color: #444;
-            border-radius: 8px;
-            border: 1px solid #555;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            padding: 1rem; /* Add padding to the card itself */
-        }
-
-        .class-header {
-            padding-bottom: 0.5rem; /* Scales */
-            border-bottom: 1px solid #555;
-        }
-
-        .class-header h2 {
-            margin: 0;
-            font-size: 2rem; /* Scales */
-            color: #fff;
-            text-align: center;
-        }
-
-        .class-body {
-            padding-top: 0.5rem; /* Scales */
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem; /* Scales */
-            flex-grow: 1;
-        }
-
-        .event {
-            line-height: 1.3; /* Tighter line-height to save space */
-        }
-
-        .event-type {
-            font-weight: bold;
-            font-size: 1.2rem; /* Scales */
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 0.25rem;
-        }
-
-        .event-type.now { color: #27ae60; }
-        .event-type.next { color: #2980b9; }
-        .event-type.break { color: #95a5a6; }
-
-        .event-item {
-            margin-bottom: 0.25rem;
-        }
+        
+        .class-card { background-color: var(--color-header-bg); border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); border: 1px solid var(--color-border); overflow: hidden; display: flex; flex-direction: column; }
+        .class-header { padding: 12px 16px; border-bottom: 1px solid var(--color-border); }
+        .class-header h2 { margin: 0; font-size: 1.5em; color: var(--color-text-primary); }
+        .class-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; flex-grow: 1; }
+        .event { line-height: 1.4; }
+        .event-type { font-weight: bold; font-size: 0.9em; text-transform: uppercase; letter-spacing: 0.5px; }
+        .event-type.now { color: var(--color-now); }
+        .event-type.next { color: var(--color-next); }
+        .event-type.break { color: var(--color-break); }
+        .event-item { margin-bottom: 8px; }
         .event-item:last-child { margin-bottom: 0; }
+        .event-subject { font-size: 1.2em; font-weight: 600; margin: 2px 0; }
+        .event-teacher { font-size: 0.9em; color: var(--color-text-secondary); font-weight: 600; }
+        .event-details { font-size: 0.9em; color: var(--color-text-secondary); margin-top: 8px; }
+        .event-none { font-size: 1.0em; color: var(--color-text-secondary); flex-grow: 1; display: flex; align-items: center; justify-content: center; min-height: 40px; }
 
-        .event-subject {
-            font-size: 1.6rem; /* Scales */
-            font-weight: 600;
-            margin: 0;
-        }
-
-        .event-teacher {
-            font-size: 1.2rem; /* Scales */
-            color: #ccc;
-            font-weight: 600;
-        }
-
-        .event-details {
-            font-size: 1.2rem; /* Scales */
-            color: #ccc;
-            margin-top: 0.25rem;
-        }
-
-        .event-none {
-            font-size: 1.5rem; /* Scales */
-            color: #ccc;
-            flex-grow: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 30px;
-        }
     </style>
 </head>
 <body>
@@ -420,8 +330,8 @@
                 const location = lesson.room ? `(${lesson.room})` : '';
                 
                 const teachers = lesson.teacher.split(',')
-                                            .map(t => t.trim())
-                                            .filter(t => !excludedStaff.includes(t));
+                                    .map(t => t.trim())
+                                    .filter(t => !excludedStaff.includes(t));
                 const teacher = teachers.join(', ');
                 
                 const mainClassRegex = /^[4-9][A-Z]$/;
@@ -449,27 +359,40 @@
             `;
         }
 
+        /**
+         * (MODIFIED) Main function to UPDATE THE CONTENT of the dashboard.
+         */
         function updateDashboard() {
             if (allLessons.length === 0) return;
 
-            // --- THIS IS THE LINE THAT WAS CHANGED ---
-            // It now looks for "sign" instead of "view"
-            const view = getURLParameter('view') || 'all'; // Changed this back to 'view' to match your config
-            // ----------------------------------------
+            // --- THIS IS THE NEW FILTERING LOGIC ---
+            const view = getURLParameter('view') || 'all'; // Changed from 'sign' back to 'view'
             
-            let classFilterRegex;
-            if (view === 'junior') {
-                classFilterRegex = /^[4-6][A-Z]$/; // Years 4, 5, 6
-            } else if (view === 'senior') {
-                classFilterRegex = /^[7-9][A-Z]$/; // Years 7, 8, 9
-            } else {
-                classFilterRegex = /^[4-9][A-Z]$/; // All
-            }
-            
-            const classNames = [...new Set(allLessons.map(l => l.baseGroup))]
+            // Get all unique, sorted main class names
+            const allClassNames = [...new Set(allLessons.map(l => l.baseGroup))]
                 .filter(name => /^[4-9][A-Z]$/.test(name)) 
-                .filter(name => classFilterRegex.test(name))
                 .sort();
+            
+            let classNames = [];
+            
+            // Define the class lists for each view
+            if (view === 'junior1') {
+                const list = ['4A', '4B', '5A', '5B'];
+                classNames = allClassNames.filter(name => list.includes(name));
+            } else if (view === 'junior2') {
+                const list = ['6A', '6B'];
+                classNames = allClassNames.filter(name => list.includes(name));
+            } else if (view === 'senior1') {
+                const list = ['7A', '7B', '7C', '8A', '8B'];
+                classNames = allClassNames.filter(name => list.includes(name));
+            } else if (view === 'senior2') {
+                const list = ['9A', '9B', '9C', '9D'];
+                classNames = allClassNames.filter(name => list.includes(name));
+            } else {
+                // Default 'all' view
+                classNames = allClassNames; 
+            }
+            // --- END OF NEW FILTERING LOGIC ---
             
             const nowNextContainer = document.getElementById('now-next-container');
             nowNextContainer.innerHTML = ''; 
