@@ -127,9 +127,7 @@
 
     <script>
         // --- THIS IS THE LIST YOU CAN EDIT ---
-        // Add any staff codes you want to exclude into this list.
-        const excludedStaff = ["VikCos,AvdM"];
-        // e.g., const excludedStaff = ["VikCos", "OtherName", "NewStaff"];
+        const excludedStaff = ["VikCos"];
         // -------------------------------------
 
         let allLessons = [];
@@ -178,9 +176,6 @@
             return weeks;
         }
 
-        /**
-         * (MODIFIED) Parses the raw TSV data into a usable array of lesson objects.
-         */
         function parseLessons(tsv) {
             const lessons = [];
             const lines = tsv.trim().split(/[\r\n]+/);
@@ -216,15 +211,13 @@
                 const values = lines[i].split('\t');
                 if (values.length < headers.length) continue;
 
-                // --- NEW: Filter to exclude staff ---
                 const teacherStr = values[colIdx.teacher].trim();
-                const teachers = teacherStr.split(',').map(t => t.trim()); // Handle multiple teachers
+                const teachers = teacherStr.split(',').map(t => t.trim());
                 const isExcluded = teachers.some(teacher => excludedStaff.includes(teacher));
 
                 if (isExcluded) {
-                    continue; // Skip this lesson entirely
+                    continue; 
                 }
-                // --- END OF FILTER ---
 
                 const day = values[colIdx.day].trim();
                 const startTimeStr = values[colIdx.starttime].trim().padStart(4, '0');
@@ -263,9 +256,6 @@
             return lessons;
         }
 
-        /**
-         * Gets all lessons for a base class (e.g., "7A").
-         */
         function getLessonsForDay(baseClassName, nowDay, currentWeek) {
             const dayMap = ["", "Mon", "Tue", "Wed", "Thur", "Fri"];
             const currentDayStr = dayMap[nowDay];
@@ -274,8 +264,8 @@
                 return []; // Weekend
             }
 
-            const year = baseClassName.charAt(0); // e.g., "7" from "7A"
-            const mainClassRegex = /^[4-9][A-Z]$/; // Regex to find main classes like 4A, 7B
+            const year = baseClassName.charAt(0);
+            const mainClassRegex = /^[4-9][A-Z]$/; 
 
             const lessons = allLessons.filter(l => {
                 if (l.day !== currentDayStr || !l.validWeeks.includes(currentWeek)) {
@@ -339,12 +329,10 @@
             const lessonHtml = lessons.map(lesson => {
                 const location = lesson.room ? `(${lesson.room})` : '';
                 
-                // --- NEW: Filter out excluded staff from teacher display ---
                 const teachers = lesson.teacher.split(',')
                                     .map(t => t.trim())
                                     .filter(t => !excludedStaff.includes(t));
                 const teacher = teachers.join(', ');
-                // --- END OF FILTER ---
                 
                 const mainClassRegex = /^[4-9][A-Z]$/;
                 let groupName = '';
@@ -374,7 +362,10 @@
         function updateDashboard() {
             if (allLessons.length === 0) return;
 
-            const view = getURLParameter('view') || 'all'; 
+            // --- THIS IS THE LINE THAT WAS CHANGED ---
+            // It now looks for "sign" instead of "view"
+            const view = getURLParameter('sign') || 'all'; 
+            // ----------------------------------------
             
             let classFilterRegex;
             if (view === 'junior') {
@@ -465,4 +456,3 @@
     </script>
 </body>
 </html>
-
