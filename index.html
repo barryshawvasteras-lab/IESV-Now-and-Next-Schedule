@@ -79,6 +79,9 @@
             margin-bottom: 0;
         }
         
+        /* --- DYNAMIC GRID STYLES --- */
+        
+        /* Default: 1-4 classes */
         #now-next-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -100,6 +103,32 @@
         .event-teacher { font-size: 0.9em; color: var(--color-text-secondary); font-weight: 600; }
         .event-details { font-size: 0.9em; color: var(--color-text-secondary); margin-top: 8px; }
         .event-none { font-size: 1.0em; color: var(--color-text-secondary); flex-grow: 1; display: flex; align-items: center; justify-content: center; min-height: 40px; }
+
+        /* Medium: 5-6 classes (e.g., Senior1 view) */
+        body.count-medium #now-next-container {
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 12px;
+        }
+        body.count-medium .class-header { padding: 10px 14px; }
+        body.count-medium .class-body { padding: 14px; gap: 10px; }
+        body.count-medium .class-header h2 { font-size: 1.3em; }
+        body.count-medium .event-subject { font-size: 1.1em; }
+        body.count-medium .event-teacher,
+        body.count-medium .event-details { font-size: 0.85em; }
+        body.count-medium .event-none { font-size: 0.9em; }
+
+        /* Large: 7+ classes (e.g., "All" view) */
+        body.count-large #now-next-container {
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 10px;
+        }
+        body.count-large .class-header { padding: 8px 12px; }
+        body.count-large .class-body { padding: 12px; gap: 8px; }
+        body.count-large .class-header h2 { font-size: 1.2em; }
+        body.count-large .event-subject { font-size: 1.0em; }
+        body.count-large .event-teacher,
+        body.count-large .event-details { font-size: 0.8em; }
+        body.count-large .event-none { font-size: 0.8em; }
 
     </style>
 </head>
@@ -365,17 +394,15 @@
         function updateDashboard() {
             if (allLessons.length === 0) return;
 
-            // --- THIS IS THE NEW FILTERING LOGIC ---
-            const view = getURLParameter('view') || 'all'; // Changed from 'sign' back to 'view'
+            // --- THIS IS THE FILTERING LOGIC ---
+            const view = getURLParameter('view') || 'all'; 
             
-            // Get all unique, sorted main class names
             const allClassNames = [...new Set(allLessons.map(l => l.baseGroup))]
                 .filter(name => /^[4-9][A-Z]$/.test(name)) 
                 .sort();
             
             let classNames = [];
             
-            // Define the class lists for each view
             if (view === 'junior1') {
                 const list = ['4A', '4B', '5A', '5B'];
                 classNames = allClassNames.filter(name => list.includes(name));
@@ -389,10 +416,24 @@
                 const list = ['9A', '9B', '9C', '9D'];
                 classNames = allClassNames.filter(name => list.includes(name));
             } else {
-                // Default 'all' view
                 classNames = allClassNames; 
             }
-            // --- END OF NEW FILTERING LOGIC ---
+            // --- END OF FILTERING LOGIC ---
+
+            // --- NEW: Apply dynamic sizing class to body ---
+            const cardCount = classNames.length;
+            const bodyEl = document.body;
+            
+            bodyEl.classList.remove('count-small', 'count-medium', 'count-large');
+            
+            if (cardCount <= 4) {
+                bodyEl.classList.add('count-small');
+            } else if (cardCount <= 6) {
+                bodyEl.classList.add('count-medium');
+            } else {
+                bodyEl.classList.add('count-large');
+            }
+            // --- END OF NEW SIZING LOGIC ---
             
             const nowNextContainer = document.getElementById('now-next-container');
             nowNextContainer.innerHTML = ''; 
