@@ -79,9 +79,6 @@
             margin-bottom: 0;
         }
         
-        /* --- DYNAMIC GRID STYLES --- */
-        
-        /* Default: 1-4 classes */
         #now-next-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -104,7 +101,7 @@
         .event-details { font-size: 0.9em; color: var(--color-text-secondary); margin-top: 8px; }
         .event-none { font-size: 1.0em; color: var(--color-text-secondary); flex-grow: 1; display: flex; align-items: center; justify-content: center; min-height: 40px; }
 
-        /* Medium: 5-6 classes (e.g., Senior1 view) */
+        /* Dynamic Sizing Styles */
         body.count-medium #now-next-container {
             grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
             gap: 12px;
@@ -117,7 +114,6 @@
         body.count-medium .event-details { font-size: 0.85em; }
         body.count-medium .event-none { font-size: 0.9em; }
 
-        /* Large: 7+ classes (e.g., "All" view) */
         body.count-large #now-next-container {
             grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
             gap: 10px;
@@ -367,7 +363,7 @@
                 let groupName = '';
                 if (lesson.group.includes(':')) {
                     groupName = `[${lesson.group.split(':')[1]}] `;
-                } else if (!mainClassRegex.test(lesson.baseGroup)) {
+                } else if (!mainClassRegex.test(lesson.baseGrdoup)) {
                     groupName = `[${lesson.baseGroup.substring(1)}] `; 
                 }
 
@@ -388,13 +384,9 @@
             `;
         }
 
-        /**
-         * (MODIFIED) Main function to UPDATE THE CONTENT of the dashboard.
-         */
         function updateDashboard() {
             if (allLessons.length === 0) return;
 
-            // --- THIS IS THE FILTERING LOGIC ---
             const view = getURLParameter('view') || 'all'; 
             
             const allClassNames = [...new Set(allLessons.map(l => l.baseGroup))]
@@ -418,9 +410,7 @@
             } else {
                 classNames = allClassNames; 
             }
-            // --- END OF FILTERING LOGIC ---
 
-            // --- NEW: Apply dynamic sizing class to body ---
             const cardCount = classNames.length;
             const bodyEl = document.body;
             
@@ -433,7 +423,6 @@
             } else {
                 bodyEl.classList.add('count-large');
             }
-            // --- END OF NEW SIZING LOGIC ---
             
             const nowNextContainer = document.getElementById('now-next-container');
             nowNextContainer.innerHTML = ''; 
@@ -478,13 +467,23 @@
             }
         }
 
+        /**
+         * (MODIFIED) This function runs once on page load to fetch the data.
+         */
         async function loadDataAndRun() {
             try {
+                // Added cache-busting timestamp
                 const response = await fetch('Lessons.txt?cachebust=' + new Date().getTime());
+                
                 if (!response.ok) {
                     throw new Error(`Failed to load Lessons.txt (Status: ${response.status})`);
                 }
-                const tsvData = await response.text();
+
+                // Fetch as an ArrayBuffer
+                const buffer = await response.arrayBuffer();
+                
+                // Decode the buffer as UTF-8
+                const tsvData = new TextDecoder('utf-8').decode(buffer);
                 
                 allLessons = parseLessons(tsvData); 
                 
