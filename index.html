@@ -152,7 +152,7 @@
 
     <script>
         // --- THIS IS THE LIST YOU CAN EDIT ---
-        const excludedStaff = ["VikCos, AvdM"];
+        const excludedStaff = ["VikCos"];
         // -------------------------------------
 
         let allLessons = [];
@@ -390,24 +390,35 @@
         function updateDashboard() {
             if (allLessons.length === 0) return;
 
-            // --- THIS IS THE FIX ---
-            // It now looks for "sign" again, as you requested.
-            const view = getURLParameter('sign') || 'all'; 
+            // --- THIS IS THE NEW FILTERING LOGIC ---
+            // It now looks for "view" again, as you requested.
+            const view = getURLParameter('view') || 'all'; 
             
-            let classFilterRegex;
-            if (view === 'junior') {
-                classFilterRegex = /^[4-6][A-Z]$/; // Years 4, 5, 6
-            } else if (view === 'senior') {
-                classFilterRegex = /^[7-9][A-Z]$/; // Years 7, 8, 9
-            } else {
-                classFilterRegex = /^[4-9][A-Z]$/; // All
-            }
-            
-            const classNames = [...new Set(allLessons.map(l => l.baseGroup))]
+            // Get all unique, sorted main class names
+            const allClassNames = [...new Set(allLessons.map(l => l.baseGroup))]
                 .filter(name => /^[4-9][A-Z]$/.test(name)) 
-                .filter(name => classFilterRegex.test(name))
                 .sort();
-            // --- END OF FIX ---
+            
+            let classNames = [];
+            
+            // Define the class lists for each view
+            if (view === 'junior1') {
+                const list = ['4A', '4B', '5A', '5B'];
+                classNames = allClassNames.filter(name => list.includes(name));
+            } else if (view === 'junior2') {
+                const list = ['6A', '6B'];
+                classNames = allClassNames.filter(name => list.includes(name));
+            } else if (view === 'senior1') {
+                const list = ['7A', '7B', '7C', '8A', '8B'];
+                classNames = allClassNames.filter(name => list.includes(name));
+            } else if (view === 'senior2') {
+                const list = ['9A', '9B', '9C', '9D'];
+                classNames = allClassNames.filter(name => list.includes(name));
+            } else {
+                // Default 'all' view
+                classNames = allClassNames; 
+            }
+            // --- END OF NEW FILTERING LOGIC ---
 
             // --- Dynamic sizing logic ---
             const cardCount = classNames.length;
