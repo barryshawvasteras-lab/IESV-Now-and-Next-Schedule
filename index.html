@@ -363,7 +363,7 @@
                 let groupName = '';
                 if (lesson.group.includes(':')) {
                     groupName = `[${lesson.group.split(':')[1]}] `;
-                } else if (!mainClassRegex.test(lesson.baseGrdoup)) {
+                } else if (!mainClassRegex.test(lesson.baseGroup)) {
                     groupName = `[${lesson.baseGroup.substring(1)}] `; 
                 }
 
@@ -472,8 +472,10 @@
          */
         async function loadDataAndRun() {
             try {
-                // Added cache-busting timestamp
-                const response = await fetch('Lessons.txt?cachebust=' + new Date().getTime());
+                // We are forcing the fetch to ignore cache and treat the response as 'arraybuffer'
+                const response = await fetch('Lessons.txt', {
+                    cache: 'no-store' // This is a stronger cache-busting signal
+                });
                 
                 if (!response.ok) {
                     throw new Error(`Failed to load Lessons.txt (Status: ${response.status})`);
@@ -482,8 +484,10 @@
                 // Fetch as an ArrayBuffer
                 const buffer = await response.arrayBuffer();
                 
-                // Decode the buffer as UTF-8
+                // --- THIS IS THE CHANGE ---
+                // We are now decoding as "utf-8" as you confirmed
                 const tsvData = new TextDecoder('utf-8').decode(buffer);
+                // --- END OF CHANGE ---
                 
                 allLessons = parseLessons(tsvData); 
                 
