@@ -363,7 +363,7 @@
                 let groupName = '';
                 if (lesson.group.includes(':')) {
                     groupName = `[${lesson.group.split(':')[1]}] `;
-                } else if (!mainClassRegex.test(lesson.baseGroup)) { // <- This is the line with the fixed typo
+                } else if (!mainClassRegex.test(lesson.baseGroup)) { // This was the typo
                     groupName = `[${lesson.baseGroup.substring(1)}] `; 
                 }
 
@@ -478,16 +478,17 @@
                 });
                 
                 if (!response.ok) {
-                    throw.new Error(`Failed to load Lessons.txt (Status: ${response.status})`);
+                    // --- THIS IS THE FIX ---
+                    // Changed 'throw.new Error' to 'throw new Error'
+                    throw new Error(`Failed to load Lessons.txt (Status: ${response.status})`);
+                    // --- END OF FIX ---
                 }
 
                 // Fetch as an ArrayBuffer
                 const buffer = await response.arrayBuffer();
                 
-                // --- THIS IS THE FIX ---
-                // We are now decoding as "utf-8" as you confirmed
+                // Decode the buffer as UTF-8, as you confirmed
                 const tsvData = new TextDecoder('utf-8').decode(buffer);
-                // --- END OF FIX ---
                 
                 allLessons = parseLessons(tsvData); 
                 
