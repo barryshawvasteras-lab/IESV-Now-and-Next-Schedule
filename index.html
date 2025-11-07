@@ -3,493 +3,511 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IESV Digital Signage</title>
+    <title>Now & Next</title>
     <style>
-        /* --- STYLES (Unchanged) --- */
-        html, body {
-            margin: 0; padding: 0; height: 100%; width: 100%;
-            overflow: hidden; font-family: Arial, Helvetica, sans-serif;
-            background-color: #000; color: #fff;
+        :root {
+            --color-bg: #f4f7f6;
+            --color-header-bg: #ffffff;
+            --color-border: #e0e0e0;
+            --color-text-primary: #2c3e50;
+            --color-text-secondary: #5a7a9b;
+            --color-text-header: #34495e;
+            --color-now: #27ae60;
+            --color-next: #2980b9;
+            --color-break: #7f8c8d;
+            --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        
+        body {
+            font-family: var(--font-main);
+            background-color: var(--color-bg);
+            color: var(--color-text-primary);
+            margin: 0;
+            padding: 16px;
         }
 
-        #header-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 110px; 
-            background-color: #000;
-            z-index: 100;
+        /* --- Header Styles for 3-Column Layout --- */
+        #header {
             display: flex;
-            justify-content: center;
             align-items: center;
-            box-sizing: border-box;
+            margin-bottom: 20px;
         }
 
-        #weather-container {
-            width: 1200px;
+        #logo-container {
+            flex: 1;
+            text-align: left;
         }
         
-        #clock-container {
-            position: absolute; 
-            right: 20px;      
-            top: 50%;         
-            transform: translateY(-50%); 
-            text-align: right;
-            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.8);
-            z-index: 101; 
+        #logo-img {
+            height: 100px;
+            width: auto;
+            display: inline-block; 
         }
-        #clock-time { font-size: 2.5vw; font-weight: bold; }
-        #clock-date { font-size: 1vw; }
-        .clock-day-month { font-size: 0.8vw; color: #ccc; }
 
-        .view-container {
-            position: fixed;
-            top: 110px;  
-            bottom: 80px; 
-            left: 0;
-            width: 100%;
-            display: none;
-        }
-        #default-view { display: block; }
-        
-        #event-view {
-            box-sizing: border-box; padding: 50px; display: flex;
-            flex-direction: column; justify-content: center;
-            align-items: center; text-align: center;
-        }
-        #event-title { font-size: 7vw; font-weight: bold; margin-bottom: 20px; }
-        #event-time { font-size: 4vw; color: #ccc; }
-        #event-slide-content { width: 100%; height: 100%; }
-        
-        iframe { width: 100%; height: 100%; border: 0; }
-        
-        #ticker-wrap {
-            position: fixed; bottom: 20px;
-            left: 0; width: 100%;
-            height: 60px; 
-            background-color: rgba(0, 0, 0, 0.7);
-            overflow: hidden; z-index: 99; box-sizing: border-box;
-        }
-        #ticker-content {
-            display: block; position: absolute; height: 100%;
-            line-height: 60px; font-size: 30px; color: #fff;
-            white-space: nowrap; will-change: transform;
-            animation-name: ticker-scroll;
-            animation-duration: 10s;
-            animation-timing-function: linear;
-            animation-iteration-count: infinite;
-        }
-        @keyframes ticker-scroll {
-            0% { transform: translateX(100vw); }
-            100% { transform: translateX(-100%); }
+        #header-text {
+            flex: 1;
+            text-align: center;
         }
         
-        @media (max-width: 1400px) {
-            #header-bar {
-                justify-content: space-between; 
-            }
-            #weather-container {
-                width: 500px; 
-                padding-left: 20px;
-            }
-            #clock-container {
-                position: relative; 
-                right: auto;
-                top: auto;
-                transform: none; 
-                padding-right: 20px;
-            }
+        #header-spacer {
+            flex: 1;
         }
+        /* --- End of Header Styles --- */
+        
+
+        h1 {
+            color: var(--color-text-header);
+            text-align: center;
+            font-size: 2.0em;
+            margin-top: 0;
+            margin-bottom: 4px;
+        }
+
+        #clock {
+            text-align: center;
+            font-size: 1.2em;
+            color: var(--color-text-secondary);
+            margin-bottom: 4px;
+        }
+
+        #week-display {
+            text-align: center;
+            font-size: 1.0em;
+            font-weight: bold;
+            color: var(--color-text-header);
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+        
+        #now-next-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+        
+        .class-card { background-color: var(--color-header-bg); border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); border: 1px solid var(--color-border); overflow: hidden; display: flex; flex-direction: column; }
+        .class-header { padding: 12px 16px; border-bottom: 1px solid var(--color-border); }
+        .class-header h2 { margin: 0; font-size: 1.5em; color: var(--color-text-primary); }
+        .class-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; flex-grow: 1; }
+        .event { line-height: 1.4; }
+        .event-type { font-weight: bold; font-size: 0.9em; text-transform: uppercase; letter-spacing: 0.5px; }
+        .event-type.now { color: var(--color-now); }
+        .event-type.next { color: var(--color-next); }
+        .event-type.break { color: var(--color-break); }
+        .event-item { margin-bottom: 8px; }
+        .event-item:last-child { margin-bottom: 0; }
+        .event-subject { font-size: 1.2em; font-weight: 600; margin: 2px 0; }
+        .event-teacher { font-size: 0.9em; color: var(--color-text-secondary); font-weight: 600; }
+        .event-details { font-size: 0.9em; color: var(--color-text-secondary); margin-top: 8px; }
+        .event-none { font-size: 1.0em; color: var(--color-text-secondary); flex-grow: 1; display: flex; align-items: center; justify-content: center; min-height: 40px; }
+
+        /* Dynamic Sizing Styles */
+        body.count-medium #now-next-container {
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 12px;
+        }
+        body.count-medium .class-header { padding: 10px 14px; }
+        body.count-medium .class-body { padding: 14px; gap: 10px; }
+        body.count-medium .class-header h2 { font-size: 1.3em; }
+        body.count-medium .event-subject { font-size: 1.1em; }
+        body.count-medium .event-teacher,
+        body.count-medium .event-details { font-size: 0.85em; }
+        body.count-medium .event-none { font-size: 0.9em; }
+
+        body.count-large #now-next-container {
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 10px;
+        }
+        body.count-large .class-header { padding: 8px 12px; }
+        body.count-large .class-body { padding: 12px; gap: 8px; }
+        body.count-large .class-header h2 { font-size: 1.2em; }
+        body.count-large .event-subject { font-size: 1.0em; }
+        body.count-large .event-teacher,
+        body.count-large .event-details { font-size: 0.8em; }
+        body.count-large .event-none { font-size: 0.8em; }
+
     </style>
 </head>
 <body>
 
-    <div id="header-bar">
-        <div id="weather-container">
-            <a class="weatherwidget-io" href="https://forecast7.com/en/59d6116d54/vasteras/" data-label_1="VÄSTERÅS" data-label_2="WEATHER" data-theme="dark" >VÄSTERÅS WEATHER</a>
-            <script>
-            !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='https://weatherwidget.io/js/widget.min.js';fjs.parentNode.insertBefore(js,fjs);}}(document,'script','weatherwidget-io-js');
-            </script>
+    <div id="header">
+        
+        <div id="logo-container">
+            <img id="logo-img" src="logo.png" alt="School Logo"> 
         </div>
-        <div id="clock-container">
-            <div id="clock-time"></div>
-            <div id="clock-date"></div>
+
+        <div id="header-text">
+            <h1>Now & Next</h1>
+            <div id="clock">Loading...</div>
+            <div id="week-display"></div>
         </div>
+        
+        <div id="header-spacer"></div>
+        
     </div>
-    
-    <div id="default-view" class="view-container">
-        <iframe id="default-iframe" frameborder="0" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
-    </div>
-    <div id="event-view" class="view-container">
-        <div id="event-title"></div>
-        <div id="event-time"></div>
-        <div id="event-slide-content"></div>
-    </div>
-    
-    <div id="ticker-wrap">
-        <div id="ticker-content"></div>
+    <div id="nowNextView">
+        <div id="now-next-container">
+            </div>
     </div>
 
+    <script>
+        // --- THIS IS THE LIST YOU CAN EDIT ---
+        const excludedStaff = ["VikCos, AvdM"];
+        // -------------------------------------
 
-    <script type="text/javascript">
-        'use strict'; 
+        let allLessons = [];
 
-        // ---------------------------------
-        // --- SECTION 1: CONFIGURATION ---
-        // ---------------------------------
-
-        const API_KEY = ''; // ❗ PASTE YOUR API KEY HERE
-        const REFRESH_INTERVAL = 60000; 
-        const TICKER_REFRESH_INTERVAL = REFRESH_INTERVAL * 5; 
-
-        // This is your last known-good config
-        const SIGNAGE_CONFIGS = {
-            'junior': {
-                calendarId: 'c_f95b4feddefb64d35df9e2b89f1cd628b54f6de1d7af9fa05245cde28cdb390d@group.calendar.google.com',
-                presentationId: '1Hm9DlVNLmN0tKTD7tR9b0vdu3AMTPNkLdLUdotyKlhM',
-                tickerFile: 'ticker-junior.txt',
-                defaultRotation: [
-                    { url: 'https://docs.google.com/presentation/d/e/2PACX-1vTYWiGFjHWeacQIT0db_CjXqzy0FvSxVsulVHsBsKSGU0v7HLD2tmvgaEntgzYbCQgvlyWVvyMMupmx/pubembed?start=true&loop=true&delayms=10000&rm=minimal', duration: 45000 },
-                    { url: 'https://iesv-swe.github.io/IESV-Now-and-Next/?view=junior1', duration: 15000 }
-                ]
-            },
-            'senior': {
-                calendarId: 'c_2792c6b8f08afd427f56b3f49c841518ca3a9e9b881ac545f5fc8b2516488e00@group.calendar.google.com',
-                presentationId: '1GzzhdbgCjSM4_p6cvkY_ne34I87Z7eb4ITwxiGameb8', // This is for 'show=slide'
-                tickerFile: 'ticker-senior.txt',
-                defaultRotation: [
-                    { url: 'https://docs.google.com/presentation/d/e/2PACX-1vQa7OW-5fkXiK7DHhMxqerBxy6Is8HIn4ct9tZiTNNRpQ2COYB7yYNl3fx6DiJEz7J5jtB0cFsXwt0u/pubembed?start=true&loop=true&delayms=10000&rm=minimal', duration: 45000 },
-                    { url: 'https://iesv-swe.github.io/IESV-Now-and-Next/?view=junior2', duration: 15000 },
-                    { url: 'https://iesv-swe.github.io/IESV-Now-and-Next/?view=senior1', duration: 15000 },
-                    { url: 'https://iesv-swe.github.io/IESV-Now-and-Next/?view=senior2', duration: 15000 }
-                ]
-            }
-        };
-
-
-        // ---------------------------------
-        // --- SECTION 2: GLOBAL STATE & DOM ---
-        // ---------------------------------
-
-        const app = {
-            state: {
-                currentSettings: null,
-                rotationTimer: null,
-                rotationIndex: 0
-            },
-            dom: {
-                clockTime: null,
-                clockDate: null,
-                defaultView: null,
-                eventView: null,
-                eventTitle: null,
-                eventTime: null,
-                eventSlideContent: null,
-                defaultIframe: null,
-                tickerContent: null
-            }
-        };
-
-        // ---------------------------------
-        // --- SECTION 3: INITIALIZATION ---
-        // ---------------------------------
-
-        /**
-         * Main function, called by Google API script tag on load.
-         * This is the entry point for the entire application.
-         */
-        function start() {
-            console.log("Signage app starting...");
-
-            // 1. Find and store all our HTML elements
-            app.dom.clockTime = document.getElementById('clock-time');
-            app.dom.clockDate = document.getElementById('clock-date');
-            app.dom.defaultView = document.getElementById('default-view');
-            app.dom.eventView = document.getElementById('event-view');
-            app.dom.eventTitle = document.getElementById('event-title');
-            app.dom.eventTime = document.getElementById('event-time');
-            app.dom.eventSlideContent = document.getElementById('event-slide-content');
-            app.dom.defaultIframe = document.getElementById('default-iframe');
-            app.dom.tickerContent = document.getElementById('ticker-content');
-
-            // 2. Start the clock
-            updateClock();
-            setInterval(updateClock, 1000);
-
-            // 3. NEW: Start the Wake Lock "jiggle"
-            initWakeLock();
-
-            // 4. Get sign configuration from URL (?sign=...)
+        function getURLParameter(name) {
             const urlParams = new URLSearchParams(window.location.search);
-            const signId = urlParams.get('sign');
-
-            if (signId && SIGNAGE_CONFIGS[signId]) {
-                app.state.currentSettings = SIGNAGE_CONFIGS[signId];
-                console.log(`Loading configuration for: ${signId}`);
-
-                // 5. Load initial data
-                loadTickerFile();
-                setInterval(loadTickerFile, TICKER_REFRESH_INTERVAL);
-
-                // 6. Initialize Google API client
-                gapi.load('client', initClient);
-            } else {
-                // If no valid ?sign=... is found, show a fatal error
-                showFatalError(
-                    'Configuration Error: Invalid or missing sign ID in URL.',
-                    'Please add <strong>?sign=junior</strong> or <strong>?sign=senior</strong> to the end of the URL.'
-                );
-            }
+            return urlParams.get(name);
         }
 
-        /**
-         * Initializes the Google API client (GAPI)
-         */
-        function initClient() {
-            gapi.client.init({
-                'apiKey': API_KEY,
-                'discoveryDocs': ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest'],
-            }).then(() => {
-                console.log('Google API client initialized.');
-                
-                // 7. Start the main calendar check loop
-                checkCalendar();
-                setInterval(checkCalendar, REFRESH_INTERVAL);
-            }, (error) => {
-                console.error('Error initializing Google client:', error);
-                showDefaultView();
-            });
+        function timeToMinutes(timeStr) {
+            const hours = parseInt(timeStr.substring(0, 2), 10);
+            const minutes = parseInt(timeStr.substring(2, 4), 10);
+            return (hours * 60) + minutes;
+        }
+
+        function minutesToTime(totalMinutes) {
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+            return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+        }
+
+        function getWeekNumber(date) {
+            const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+            const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+            const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+            return weekNo;
         }
         
-        /**
-         * NEW: Initializes a "Screen Wake Lock" to fight the OS idle timer.
-         * It will re-request the lock every 4 minutes as a "jiggle"
-         * to ensure it stays active against the "ghost" policy.
-         */
-        function initWakeLock() {
-            let wakeLock = null;
-
-            const requestLock = async () => {
-                // Only try to request if the API exists
-                if ('wakeLock' in navigator) {
-                    try {
-                        // Note: A new request automatically releases any previous lock.
-                        wakeLock = await navigator.wakeLock.request('screen');
-                        console.log('Screen Wake Lock is active!');
-                        
-                        // Set up a listener *once* to log when it's released
-                        wakeLock.addEventListener('release', () => {
-                            console.log('Screen Wake Lock was released.');
-                            wakeLock = null;
-                        });
-
-                    } catch (err) {
-                        console.error('Wake Lock request failed:', err.message);
+        function parseWeekRanges(rangeStr) {
+            const weeks = [];
+            if (!rangeStr || rangeStr === "0") {
+                return weeks;
+            }
+            const parts = rangeStr.split(',');
+            for (const part of parts) {
+                if (part.includes('-')) {
+                    const [start, end] = part.split('-').map(Number);
+                    for (let i = start; i <= end; i++) {
+                        weeks.push(i);
                     }
                 } else {
-                    console.warn('Wake Lock API is not supported.');
+                    weeks.push(Number(part));
                 }
-            };
-
-            // 1. Request the lock immediately
-            requestLock();
-            
-            // 2. Then, re-request it every 4 minutes to "jiggle" the system
-            //    and fight the ghost policy. (4 * 60 * 1000 = 240000)
-            setInterval(requestLock, 240000); // <-- THIS LINE IS CHANGED
+            }
+            return weeks;
         }
 
-        // ---------------------------------
-        // --- SECTION 4: DATA FETCHING ---
-        // ---------------------------------
+        function parseLessons(tsv) {
+            const lessons = [];
+            const lines = tsv.trim().split(/[\r\n]+/);
+            
+            if (lines.length < 2) {
+                console.error("No data found or invalid data format.");
+                return [];
+            }
+            
+            const headers = lines[0].split('\t').map(h => h.trim());
+            
+            const colIdx = {
+                group: headers.indexOf('group'),
+                subject: headers.indexOf('subject'),
+                day: headers.indexOf('day'),
+                starttime: headers.indexOf('starttime'),
+                length: headers.indexOf('length'),
+                room: headers.indexOf('room'),
+                realweeks: headers.indexOf('realweeks'),
+                teacher: headers.indexOf('teacher')
+            };
 
-        function loadTickerFile() {
-            const tickerFile = app.state.currentSettings.tickerFile;
-            if (!tickerFile) {
-                console.warn('No ticker file specified.');
-                app.dom.tickerContent.innerText = '';
+            for (const key in colIdx) {
+                if (colIdx[key] === -1) {
+                    console.error(`Error: Required column "${key}" not found in data.`);
+                    return []; 
+                }
+            }
+            
+            const validDays = ["Mon", "Tue", "Wed", "Thur", "Fri"];
+            
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split('\t');
+                if (values.length < headers.length) continue;
+
+                const teacherStr = values[colIdx.teacher].trim();
+                const teachers = teacherStr.split(',').map(t => t.trim());
+                const isExcluded = teachers.some(teacher => excludedStaff.includes(teacher));
+
+                if (isExcluded) {
+                    continue; 
+                }
+
+                const day = values[colIdx.day].trim();
+                const startTimeStr = values[colIdx.starttime].trim().padStart(4, '0');
+                const length = parseInt(values[colIdx.length], 10);
+                
+                if (!validDays.includes(day) || !startTimeStr || length <= 0) {
+                    continue;
+                }
+
+                const startTime = timeToMinutes(startTimeStr);
+                const lessonData = {
+                    subject: values[colIdx.subject].trim(),
+                    day: day,
+                    room: values[colIdx.room].trim(),
+                    teacher: teacherStr,
+                    startTime: startTime,
+                    endTime: startTime + length,
+                    startTimeStr: minutesToTime(startTime),
+                    endTimeStr: minutesToTime(startTime + length),
+                    validWeeks: parseWeekRanges(values[colIdx.realweeks])
+                };
+
+                const groups = values[colIdx.group].trim().split(',');
+                for (const g of groups) {
+                    const trimmedGroup = g.trim();
+                    if (trimmedGroup) {
+                        const baseGroup = trimmedGroup.split(':')[0];
+                        lessons.push({ 
+                            ...lessonData, 
+                            group: trimmedGroup,
+                            baseGroup: baseGroup 
+                        });
+                    }
+                }
+            }
+            return lessons;
+        }
+
+        function getLessonsForDay(baseClassName, nowDay, currentWeek) {
+            const dayMap = ["", "Mon", "Tue", "Wed", "Thur", "Fri"];
+            const currentDayStr = dayMap[nowDay];
+
+            if (!currentDayStr) {
+                return []; // Weekend
+            }
+
+            const year = baseClassName.charAt(0);
+            const mainClassRegex = /^[4-9][A-Z]$/; 
+
+            const lessons = allLessons.filter(l => {
+                if (l.day !== currentDayStr || !l.validWeeks.includes(currentWeek)) {
+                    return false;
+                }
+                const isForThisClass = l.baseGroup === baseClassName;
+                const isForThisYear = l.group.startsWith(year) && !mainClassRegex.test(l.baseGroup);
+                return (isForThisClass || isForThisYear);
+            });
+            
+            const uniqueLessons = [...new Map(lessons.map(l => [l.group + l.startTime, l])).values()];
+            return uniqueLessons.sort((a, b) => a.startTime - b.startTime);
+        }
+
+        function getNowAndNext(todayLessons, nowMinutes) {
+            const nowLessons = todayLessons.filter(l => 
+                nowMinutes >= l.startTime && nowMinutes < l.endTime
+            );
+
+            let nextLessons = [];
+            let nextStartTime = Infinity;
+            let referenceTime = nowMinutes; 
+
+            if (nowLessons.length > 0) {
+                const nowEndTime = Math.max(...nowLessons.map(l => l.endTime));
+                referenceTime = nowEndTime - 1; 
+            }
+
+            for (const lesson of todayLessons) {
+                if (lesson.startTime > referenceTime && lesson.startTime < nextStartTime) {
+                    nextStartTime = lesson.startTime;
+                }
+            }
+
+            if (nextStartTime !== Infinity) {
+                nextLessons = todayLessons.filter(l => l.startTime === nextStartTime);
+            }
+
+            return { nowLessons, nextLessons };
+        }
+
+        function createEventBlockHTML(lessons, type) {
+            const typeClass = type.toLowerCase();
+            const typeLabel = type;
+
+            if (!lessons || lessons.length === 0) {
+                const subject = (type === 'Now') ? 'Break / Lunch' : 'End of Day';
+                const details = (type === 'Now') ? 'No class scheduled' : 'No more classes scheduled';
+                return `
+                    <div class="event">
+                        <div class="event-type break">${typeLabel}</div>
+                        <div class="event-subject">${subject}</div>
+                        <div class="event-details">${details}</div>
+                    </div>`;
+            }
+
+            const timeDetails = (type === 'Now') 
+                ? `Ends at ${lessons[0].endTimeStr}` 
+                : `Starts at ${lessons[0].startTimeStr}`;
+            
+            const lessonHtml = lessons.map(lesson => {
+                const location = lesson.room ? `(${lesson.room})` : '';
+                
+                const teachers = lesson.teacher.split(',')
+                                    .map(t => t.trim())
+                                    .filter(t => !excludedStaff.includes(t));
+                const teacher = teachers.join(', ');
+                
+                const mainClassRegex = /^[4-9][A-Z]$/;
+                let groupName = '';
+                if (lesson.group.includes(':')) {
+                    groupName = `[${lesson.group.split(':')[1]}] `;
+                } else if (!mainClassRegex.test(lesson.baseGroup)) {
+                    groupName = `[${lesson.baseGroup.substring(1)}] `; 
+                }
+
+                return `
+                    <div class="event-item">
+                        <div class="event-subject">${groupName}${lesson.subject} ${location}</div>
+                        <div class="event-teacher">${teacher}</div>
+                    </div>
+                `;
+            }).join('');
+
+            return `
+                <div class="event">
+                    <div class="event-type ${typeClass}">${typeLabel}</div>
+                    ${lessonHtml}
+                    <div class="event-details">${timeDetails}</div>
+                </div>
+            `;
+        }
+
+        /**
+         * (MODIFIED) Main function to UPDATE THE CONTENT of the dashboard.
+         */
+        function updateDashboard() {
+            if (allLessons.length === 0) return;
+
+            // --- THIS IS THE FIX ---
+            // It now looks for "sign" again, as you requested.
+            const view = getURLParameter('sign') || 'all'; 
+            
+            let classFilterRegex;
+            if (view === 'junior') {
+                classFilterRegex = /^[4-6][A-Z]$/; // Years 4, 5, 6
+            } else if (view === 'senior') {
+                classFilterRegex = /^[7-9][A-Z]$/; // Years 7, 8, 9
+            } else {
+                classFilterRegex = /^[4-9][A-Z]$/; // All
+            }
+            
+            const classNames = [...new Set(allLessons.map(l => l.baseGroup))]
+                .filter(name => /^[4-9][A-Z]$/.test(name)) 
+                .filter(name => classFilterRegex.test(name))
+                .sort();
+            // --- END OF FIX ---
+
+            // --- Dynamic sizing logic ---
+            const cardCount = classNames.length;
+            const bodyEl = document.body;
+            
+            bodyEl.classList.remove('count-small', 'count-medium', 'count-large');
+            
+            if (cardCount <= 4) {
+                bodyEl.classList.add('count-small');
+            } else if (cardCount <= 6) {
+                bodyEl.classList.add('count-medium');
+            } else {
+                bodyEl.classList.add('count-large');
+            }
+            // --- End of sizing logic ---
+            
+            const nowNextContainer = document.getElementById('now-next-container');
+            nowNextContainer.innerHTML = ''; 
+            
+            const now = new Date(new Date().toLocaleString("en-US", {timeZone: "Europe/Stockholm"}));
+            const nowDay = now.getDay(); 
+            const nowMinutes = (now.getHours() * 60) + now.getMinutes();
+            const currentWeek = getWeekNumber(now); 
+
+            const clockEl = document.getElementById('clock');
+            const weekEl = document.getElementById('week-display');
+            
+            const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+            
+            clockEl.innerHTML = `${dayNames[nowDay]}, ${minutesToTime(nowMinutes)}`;
+            weekEl.innerHTML = `Displaying Schedule for: Week ${currentWeek}`;
+
+            if (nowDay === 0 || nowDay === 6) {
+                nowNextContainer.innerHTML = "<h2>It's the weekend.</h2>";
                 return;
             }
 
-            const url = `${tickerFile}?t=${new Date().getTime()}`; // Cache-busting
-            console.log(`Fetching ticker file: ${tickerFile}`);
+            if (classNames.length === 0) {
+                nowNextContainer.innerHTML = "<h2>No classes scheduled for this view.</h2>";
+                return;
+            }
 
-            fetch(url)
-                .then(response => {
-                    if (!response.ok) throw new Error('Network response was not ok');
-                    return response.text();
-                })
-                .then(text => {
-                    const trimmedText = text.trim();
-                    app.dom.tickerContent.innerText = trimmedText;
-                    if (trimmedText) {
-                        const duration = trimmedText.length * 0.15;
-                        const animationDuration = Math.max(10, duration) + 's';
-                        app.dom.tickerContent.style.animationDuration = animationDuration;
-                    }
-                })
-                .catch(error => {
-                    console.error(`Error fetching ${tickerFile}:`, error);
-                    app.dom.tickerContent.innerText = '';
+            for (const className of classNames) {
+                const todayLessons = getLessonsForDay(className, nowDay, currentWeek);
+                const { nowLessons, nextLessons } = getNowAndNext(todayLessons, nowMinutes);
+                
+                const nowNextCard = document.createElement('div');
+                nowNextCard.className = 'class-card';
+                nowNextCard.innerHTML = `
+                    <div class="class-header"><h2>${className}</h2></div>
+                    <div class="class-body">
+                        ${createEventBlockHTML(nowLessons, 'Now')}
+                        ${createEventBlockHTML(nextLessons, 'Next')}
+                    </div>
+                `;
+                nowNextContainer.appendChild(nowNextCard);
+            }
+        }
+
+        /**
+         * (MODIFIED) This function runs once on page load to fetch the data.
+         */
+        async function loadDataAndRun() {
+            try {
+                // This combines both cache-busting methods
+                const response = await fetch('Lessons.txt?cachebust=' + new Date().getTime(), {
+                    cache: 'no-store' // This is a stronger cache-busting signal
                 });
-        }
-
-        function checkCalendar() {
-            if (!app.state.currentSettings) return;
-            
-            const now = new Date();
-            console.log(`Checking calendar at ${now.toLocaleTimeString()}`);
-            
-            gapi.client.calendar.events.list({
-                'calendarId': app.state.currentSettings.calendarId,
-                'timeMin': now.toISOString(),
-                'maxResults': 1,
-                'singleEvents': true,
-                'orderBy': 'startTime'
-            }).then((response) => {
-                const event = response.result.items[0];
-                if (!event) {
-                    showDefaultView(); // No events found
-                    return;
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to load Lessons.txt (Status: ${response.status})`);
                 }
 
-                const eventStart = new Date(event.start.dateTime || event.start.date);
-                const eventEnd = new Date(event.end.dateTime || event.end.date);
-
-                if (now >= eventStart && now < eventEnd) {
-                    console.log('Active event found:', event.summary);
-                    parseEvent(event); // Show the event
-                } else {
-                    showDefaultView(); // No *active* event
+                // Fetch as an ArrayBuffer
+                const buffer = await response.arrayBuffer();
+                
+                // Decode the buffer as UTF-8, as you confirmed
+                const tsvData = new TextDecoder('utf-8').decode(buffer);
+                
+                allLessons = parseLessons(tsvData); 
+                
+                if (allLessons.length === 0) {
+                    throw new Error("Could not parse any lessons from the data file.");
                 }
-            }).catch((error) => {
-                console.error('Error fetching calendar:', error);
-                showDefaultView(); // Show default on error
-            });
-        }
+                
+                updateDashboard(); 
+                setInterval(updateDashboard, 30000); 
 
-        // ---------------------------------
-        // --- SECTION 5: VIEW MANAGEMENT ---
-        // ---------------------------------
-
-        function parseEvent(event) {
-            const description = event.description || '';
-
-            if (description.includes('show=externalSlide&presId=')) {
-                try {
-                    const presId = description.split('presId=')[1].split('&')[0];
-                    const slideId = description.split('slideId=')[1].split(' ')[0];
-                    showSpecificSlide(slideId, presId);
-                } catch (e) {
-                    console.error('Could not parse external slide command.', e);
-                    showDefaultView();
-                }
-            } else if (description.includes('show=slide&id=')) {
-                try {
-                    const slideNumber = description.split('id=')[1].split(' ')[0];
-                    showSpecificSlide(slideNumber, app.state.currentSettings.presentationId);
-                } catch (e) {
-                    console.error('Could not parse slide ID.', e);
-                    showDefaultView();
-                }
-            } else if (description.includes('show=event')) {
-                showEventText(event);
-            } else {
-                showDefaultView();
+            } catch (error) {
+                console.error(error);
+                const container = document.getElementById('now-next-container');
+                container.innerHTML = `
+                    <h2 style="color: red;">Error: Could not load schedule.</h2>
+                    <p>${error.message}</p>
+                    <p>Please make sure the <b>Lessons.txt</b> file is uploaded to the same project and is public.</p>`;
             }
         }
 
-        function showDefaultView() {
-            if (app.dom.defaultView.style.display === 'block') return;
-
-            console.log('Showing default view and starting rotation.');
-            app.dom.eventView.style.display = 'none';
-            app.dom.defaultView.style.display = 'block';
-
-            if (app.state.rotationTimer) clearTimeout(app.state.rotationTimer);
-            
-            app.state.rotationIndex = 0; // Start rotation from the first page
-            rotateDefaultView();
-        }
-
-        function rotateDefaultView() {
-            const pages = app.state.currentSettings.defaultRotation;
-            if (!pages || pages.length === 0) return; 
-
-            const currentPage = pages[app.state.rotationIndex];
-            app.dom.defaultIframe.src = currentPage.url;
-            console.log(`Rotating to: ${currentPage.url} for ${currentPage.duration}ms`);
-
-            app.state.rotationIndex = (app.state.rotationIndex + 1) % pages.length;
-
-            app.state.rotationTimer = setTimeout(rotateDefaultView, currentPage.duration);
-        }
-
-        function showSpecificSlide(slideNumber, presentationId) {
-            if (app.state.rotationTimer) clearTimeout(app.state.rotationTimer);
-            
-            console.log(`Showing specific slide: ${slideNumber} from presentation: ${presentationId}`);
-            const slideUrl = `https://docs.google.com/presentation/d/${presentationId}/embed?start=false&loop=false&delayms=3000&slide=id.p${slideNumber}&rm=minimal`;
-            
-            app.dom.eventTitle.innerText = '';
-            app.dom.eventTime.innerText = '';
-            app.dom.eventSlideContent.innerHTML = `<iframe src="${slideUrl}" frameborder="0" width="100%" height="100%" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>`;
-            
-            app.dom.defaultView.style.display = 'none';
-            app.dom.eventView.style.display = 'block';
-        }
-
-        function showEventText(event) {
-            if (app.state.rotationTimer) clearTimeout(app.state.rotationTimer);
-            
-            console.log(`Showing event text: ${event.summary}`);
-            app.dom.eventSlideContent.innerHTML = '';
-            app.dom.eventTitle.innerText = event.summary;
-            app.dom.eventTime.innerText = formatEventTime(event.start, event.end);
-            
-            app.dom.defaultView.style.display = 'none';
-            app.dom.eventView.style.display = 'block';
-        }
-
-        function showFatalError(title, message) {
-            document.body.innerHTML = `<h1 style="color:red; padding: 50px;">${title}</h1>
-                                        <p style="color:white; padding: 0 50px;">${message}</p>`;
-        }
-
-        // ---------------------------------
-        // --- SECTION 6: UTILITIES ---
-        // ---------------------------------
-
-        function formatEventTime(start, end) {
-            const svOptions = { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Stockholm' };
-            const startTime = new Date(start.dateTime || start.date).toLocaleTimeString('sv-SE', svOptions);
-            const endTime = new Date(end.dateTime || end.date).toLocaleTimeString('sv-SE', svOptions);
-            return `${startTime} - ${endTime}`;
-        }
-        
-        function updateClock() {
-            const now = new Date();
-            // Using Europe/Stockholm to ensure time is correct regardless of server
-            const timeOptions = { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Stockholm' };
-            const timeString = now.toLocaleTimeString('sv-SE', timeOptions);
-            
-            const weekdayOptions = { weekday: 'long', timeZone: 'Europe/Stockholm' };
-            let weekdayString = now.toLocaleDateString('sv-SE', weekdayOptions);
-            weekdayString = weekdayString.charAt(0).toUpperCase() + weekdayString.slice(1);
-            
-            const dayMonthOptions = { day: 'numeric', month: 'long', timeZone: 'Europe/Stockholm' };
-            const dayMonthString = now.toLocaleDateString('sv-SE', dayMonthOptions);
-
-            const formattedDate = `${weekdayString}<br><span class="clock-day-month">${dayMonthString}</span>`;
-
-            if (app.dom.clockTime) {
-                app.dom.clockTime.innerText = timeString;
-                app.dom.clockDate.innerHTML = formattedDate; 
-            }
-        }
+        loadDataAndRun(); 
 
     </script>
-    <script async defer src="https://apis.google.com/js/api.js" onload="start()"></script>
 </body>
 </html>
