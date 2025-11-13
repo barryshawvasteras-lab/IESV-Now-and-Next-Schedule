@@ -384,29 +384,29 @@
             `;
         }
 
-        /**
-         * (MODIFIED) Main function to UPDATE THE CONTENT of the dashboard.
-         */
         function updateDashboard() {
             if (allLessons.length === 0) return;
 
-            // --- THIS IS THE NEW FILTERING LOGIC ---
-            // It now looks for "view" again, as you requested.
-            const view = getURLParameter('view') || 'all'; 
+            // --- FIX: Support BOTH 'view' AND 'sign' parameters ---
+            const viewParam = getURLParameter('view') || getURLParameter('sign') || 'all'; 
+            const view = viewParam.toLowerCase();
             
-            // Get all unique, sorted main class names
             const allClassNames = [...new Set(allLessons.map(l => l.baseGroup))]
                 .filter(name => /^[4-9][A-Z]$/.test(name)) 
                 .sort();
             
             let classNames = [];
             
-            // Define the class lists for each view
+            // Logic to handle all cases:
             if (view === 'junior1') {
                 const list = ['4A', '4B', '5A', '5B'];
                 classNames = allClassNames.filter(name => list.includes(name));
             } else if (view === 'junior2') {
                 const list = ['6A', '6B'];
+                classNames = allClassNames.filter(name => list.includes(name));
+            } else if (view === 'junior') {
+                // Legacy "Junior" view (4-6)
+                const list = ['4A', '4B', '5A', '5B', '6A', '6B'];
                 classNames = allClassNames.filter(name => list.includes(name));
             } else if (view === 'senior1') {
                 const list = ['7A', '7B', '7C', '8A', '8B'];
@@ -414,13 +414,15 @@
             } else if (view === 'senior2') {
                 const list = ['9A', '9B', '9C', '9D'];
                 classNames = allClassNames.filter(name => list.includes(name));
+            } else if (view === 'senior') {
+                // Legacy "Senior" view (7-9)
+                const list = ['7A', '7B', '7C', '8A', '8B', '9A', '9B', '9C', '9D'];
+                classNames = allClassNames.filter(name => list.includes(name));
             } else {
                 // Default 'all' view
                 classNames = allClassNames; 
             }
-            // --- END OF NEW FILTERING LOGIC ---
 
-            // --- Dynamic sizing logic ---
             const cardCount = classNames.length;
             const bodyEl = document.body;
             
@@ -433,7 +435,6 @@
             } else {
                 bodyEl.classList.add('count-large');
             }
-            // --- End of sizing logic ---
             
             const nowNextContainer = document.getElementById('now-next-container');
             nowNextContainer.innerHTML = ''; 
